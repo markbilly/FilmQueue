@@ -16,7 +16,7 @@ namespace FoodDiary.IdentityServer
 {
     public class Startup
     {
-        private static readonly string API_CLIENT_SECRET = "temp_value";
+        private static readonly string MVC_URL = "https://localhost:44355";
 
         public void ConfigureServices(IServiceCollection services)
         {
@@ -25,11 +25,29 @@ namespace FoodDiary.IdentityServer
                 {
                     new Client
                     {
-                        ClientId = "machineToMachine",
-                        ClientName = "Machine to Machine",
+                        ClientId = "cli",
+                        ClientName = "Food Diary CLI",
                         AllowedGrantTypes = GrantTypes.ClientCredentials,
                         ClientSecrets = new[] { new Secret("<secret_password>".Sha256()) },
-                        AllowedScopes = new[] { "api.read" }
+                        AllowedScopes = new[] 
+                        {
+                            "api.read"
+                        }
+                    },
+                    new Client
+                    {
+                        ClientId = "web",
+                        ClientName = "Food Diary Web App",
+                        AllowedGrantTypes = GrantTypes.Implicit,
+                        AllowedScopes = new[]
+                        {
+                            IdentityServerConstants.StandardScopes.OpenId,
+                            IdentityServerConstants.StandardScopes.Profile,
+                            IdentityServerConstants.StandardScopes.Email,
+                            "api.write"
+                        },
+                        RedirectUris = new[] { MVC_URL + "/signin-oidc" },
+                        PostLogoutRedirectUris = new[] { MVC_URL }
                     }
                 })
                 .AddInMemoryIdentityResources(new IdentityResource[]

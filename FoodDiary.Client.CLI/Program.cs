@@ -3,7 +3,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 
-namespace FoodDiary.CLI
+namespace FoodDiary.Client.CLI
 {
     class Program
     {
@@ -14,9 +14,9 @@ namespace FoodDiary.CLI
                 httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/x-www-form-urlencoded"));
 
                 var response = httpClient.PostAsync(
-                    "https://localhost:44312/connect/token", 
+                    "https://localhost:44312/connect/token",
                     new StringContent(
-                        "grant_type=client_credentials&scope=api.read&client_id=machineToMachine&client_secret=<secret_password>",
+                        "grant_type=client_credentials&scope=api.read&client_id=cli&client_secret=<secret_password>",
                         Encoding.UTF8,
                         "application/x-www-form-urlencoded")
                 ).Result;
