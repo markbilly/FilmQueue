@@ -17,6 +17,7 @@ namespace FoodDiary.IdentityServer
     public class Startup
     {
         private static readonly string MVC_URL = "https://localhost:44355";
+        private static readonly string API_URL = "https://localhost:44335";
 
         public void ConfigureServices(IServiceCollection services)
         {
@@ -29,10 +30,16 @@ namespace FoodDiary.IdentityServer
                         ClientName = "Food Diary CLI",
                         AllowedGrantTypes = GrantTypes.ClientCredentials,
                         ClientSecrets = new[] { new Secret("<secret_password>".Sha256()) },
-                        AllowedScopes = new[] 
-                        {
-                            "api.read"
-                        }
+                        AllowedScopes = new[] { "api.cli" }
+                    },
+                    new Client
+                    {
+                        ClientId = "api_swagger",
+                        ClientName = "Food Diary Web API - Swagger UI",
+                        AllowedGrantTypes = GrantTypes.Implicit,
+                        AllowAccessTokensViaBrowser = true,
+                        RedirectUris = new[] { API_URL + "/swagger/oauth2-redirect.html" },
+                        AllowedScopes = { "api.all" }
                     },
                     new Client
                     {
@@ -43,8 +50,7 @@ namespace FoodDiary.IdentityServer
                         {
                             IdentityServerConstants.StandardScopes.OpenId,
                             IdentityServerConstants.StandardScopes.Profile,
-                            IdentityServerConstants.StandardScopes.Email,
-                            "api.write"
+                            IdentityServerConstants.StandardScopes.Email
                         },
                         RedirectUris = new[] { MVC_URL + "/signin-oidc" },
                         PostLogoutRedirectUris = new[] { MVC_URL }
@@ -66,8 +72,8 @@ namespace FoodDiary.IdentityServer
                         ApiSecrets = new[] { new Secret("<scope_secret>".Sha256()) },
                         Scopes = new[]
                         {
-                            new Scope("api.read"),
-                            new Scope("api.write")
+                            new Scope("api.cli"),
+                            new Scope("api.all")
                         }
                     }
                 })

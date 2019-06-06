@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FoodDiary.WebApi.Controllers
@@ -24,6 +25,7 @@ namespace FoodDiary.WebApi.Controllers
             return "value";
         }
 
+        [Authorize]
         // POST api/values
         [HttpPost]
         public void Post([FromBody] string value)

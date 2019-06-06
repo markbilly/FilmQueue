@@ -8,6 +8,9 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using FoodDiary.WebApi.Infrastructure.Autofac;
 using FoodDiary.WebApi.Infrastructure.EntityFramework;
+using FoodDiary.WebApi.Infrastructure.Swagger;
+using IdentityServer4.AccessTokenValidation;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -25,6 +28,8 @@ namespace FoodDiary.WebApi
 {
     public class Startup
     {
+        private static readonly string IDSERVER_URL = "https://localhost:44312";
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -33,14 +38,30 @@ namespace FoodDiary.WebApi
         public IConfiguration Configuration { get; }
         public IContainer Container { get; private set; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
+            services.AddAuthentication(IdentityServerAuthenticationDefaults.AuthenticationScheme)
+                .AddIdentityServerAuthentication(options =>
+                {
+                    options.Authority = IDSERVER_URL;
+                    options.ApiName = "api";
+                });
+
             services.AddSwaggerGen(options =>
             {
                 options.SwaggerDoc("v1", new Info { Title = "Food Diary Web API", Version = "v1" });
+                options.AddSecurityDefinition("oauth2", new OAuth2Scheme
+                {
+                    Flow = "implicit",
+                    AuthorizationUrl = IDSERVER_URL + "/connect/authorize",
+                    Scopes = new Dictionary<string, string>
+                    {
+                        { "api.all", "Food Diary Web API - full access" }
+                    }
+                });
+                options.OperationFilter<AuthorizeCheckOperationFilter>();
             });
 
             services.AddDbContext<FoodDiaryDbContext>(options =>
@@ -57,7 +78,6 @@ namespace FoodDiary.WebApi
             return new AutofacServiceProvider(Container);
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             if (env.IsDevelopment())
@@ -72,10 +92,12 @@ namespace FoodDiary.WebApi
             app.UseHttpsRedirection();
 
             app.UseSwagger();
-            app.UseSwaggerUI(c =>
+            app.UseSwaggerUI(options =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Food Diary Web API V1");
-                c.DefaultModelsExpandDepth(-1);
+                options.SwaggerEndpoint("/swagger/v1/swagger.json", "Food Diary Web API V1");
+                options.DefaultModelsExpandDepth(-1);
+                options.OAuthClientId("api_swagger");
+                options.OAuthAppName("Food Diary Web API - Swagger");
             });
 
             JsonConvert.DefaultSettings = () =>
@@ -86,6 +108,7 @@ namespace FoodDiary.WebApi
                 };
             };
 
+            app.UseAuthentication();
             app.UseMvc();
         }
     }
