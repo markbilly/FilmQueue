@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using IdentityModel;
@@ -10,7 +11,13 @@ using IdentityServer4.Test;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace FoodDiary.IdentityServer
 {
@@ -19,9 +26,38 @@ namespace FoodDiary.IdentityServer
         private static readonly string MVC_URL = "https://localhost:44355";
         private static readonly string API_URL = "https://localhost:44335";
 
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+
+        public IConfiguration Configuration { get; }
+
         public void ConfigureServices(IServiceCollection services)
         {
+            var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
+
+            services.AddDbContext<ApplicationDbContext>(builder =>
+            {
+                builder.UseSqlServer(Configuration["ConnectionString"], sqlOptions =>
+                {
+                    sqlOptions.MigrationsAssembly(migrationsAssembly);
+                });
+            });
+
+            services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>();
+
             services.AddIdentityServer()
+                .AddOperationalStore(options =>
+                {
+                    options.ConfigureDbContext = (builder) =>
+                    {
+                        builder.UseSqlServer(Configuration["ConnectionString"], sqlOptions =>
+                        {
+                            sqlOptions.MigrationsAssembly(migrationsAssembly);
+                        });
+                    };
+                })
                 .AddInMemoryClients(new Client[]
                 {
                     new Client
@@ -77,22 +113,15 @@ namespace FoodDiary.IdentityServer
                         }
                     }
                 })
-                .AddTestUsers(new List<TestUser>
-                {
-                    new TestUser
-                    {
-                        SubjectId = "5BE86359-073C-434B-AD2D-A3932222DABE",
-                        Username = "bob",
-                        Password = "password",
-                        Claims = new[]
-                        {
-                            new Claim(JwtClaimTypes.Email, "bob@example.org")
-                        }
-                    }
-                })
+                .AddAspNetIdentity<IdentityUser>()
                 .AddDeveloperSigningCredential();
-
+            
             services.AddMvc();
+
+            services.AddSwaggerGen(options =>
+            {
+                options.SwaggerDoc("v1", new Info { Title = "Food Diary Identity Web API", Version = "v1" });
+            });
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
@@ -104,6 +133,22 @@ namespace FoodDiary.IdentityServer
 
             app.UseIdentityServer();
             app.UseStaticFiles();
+
+            app.UseSwagger();
+            app.UseSwaggerUI(options =>
+            {
+                options.SwaggerEndpoint("/swagger/v1/swagger.json", "Food Diary Identity Web API V1");
+                options.DefaultModelsExpandDepth(-1);
+            });
+
+            JsonConvert.DefaultSettings = () =>
+            {
+                return new JsonSerializerSettings
+                {
+                    ContractResolver = new CamelCasePropertyNamesContractResolver()
+                };
+            };
+
             app.UseMvcWithDefaultRoute();
         }
     }

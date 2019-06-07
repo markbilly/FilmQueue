@@ -1,85 +1,38 @@
-// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
+﻿// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-using IdentityServer4.Events;
-using IdentityServer4.Extensions;
 using IdentityServer4.Models;
 using IdentityServer4.Services;
 using IdentityServer4.Stores;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace IdentityServer4.Quickstart.UI.Device
+namespace IdentityServer4.Quickstart.UI
 {
-    [Authorize]
-    [SecurityHeaders]
-    public class DeviceController : Controller
+    public class ConsentService
     {
-        private readonly IDeviceFlowInteractionService _interaction;
         private readonly IClientStore _clientStore;
         private readonly IResourceStore _resourceStore;
-        private readonly IEventService _events;
-        private readonly ILogger<DeviceController> _logger;
+        private readonly IIdentityServerInteractionService _interaction;
+        private readonly ILogger _logger;
 
-        public DeviceController(
-            IDeviceFlowInteractionService interaction,
+        public ConsentService(
+            IIdentityServerInteractionService interaction,
             IClientStore clientStore,
             IResourceStore resourceStore,
-            IEventService eventService,
-            ILogger<DeviceController> logger)
+            ILogger logger)
         {
             _interaction = interaction;
             _clientStore = clientStore;
             _resourceStore = resourceStore;
-            _events = eventService;
             _logger = logger;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> Index([FromQuery(Name = "user_code")] string userCode)
-        {
-            if (string.IsNullOrWhiteSpace(userCode)) return View("UserCodeCapture");
-
-            var vm = await BuildViewModelAsync(userCode);
-            if (vm == null) return View("Error");
-
-            vm.ConfirmUserCode = true;
-            return View("UserCodeConfirmation", vm);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UserCodeCapture(string userCode)
-        {
-            var vm = await BuildViewModelAsync(userCode);
-            if (vm == null) return View("Error");
-
-            return View("UserCodeConfirmation", vm);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Callback(DeviceAuthorizationInputModel model)
-        {
-            if (model == null) throw new ArgumentNullException(nameof(model));
-
-            var result = await ProcessConsent(model);
-            if (result.HasValidationError) return View("Error");
-
-            return View("Success");
-        }
-
-        private async Task<ProcessConsentResult> ProcessConsent(DeviceAuthorizationInputModel model)
+        public async Task<ProcessConsentResult> ProcessConsent(ConsentInputModel model)
         {
             var result = new ProcessConsentResult();
-
-            var request = await _interaction.GetAuthorizationContextAsync(model.UserCode);
-            if (request == null) return result;
 
             ConsentResponse grantedConsent = null;
 
@@ -87,12 +40,9 @@ namespace IdentityServer4.Quickstart.UI.Device
             if (model.Button == "no")
             {
                 grantedConsent = ConsentResponse.Denied;
-
-                // emit event
-                await _events.RaiseAsync(new ConsentDeniedEvent(User.GetSubjectId(), request.ClientId, request.ScopesRequested));
             }
             // user clicked 'yes' - validate the data
-            else if (model.Button == "yes")
+            else if (model.Button == "yes" && model != null)
             {
                 // if the user consented to some scope, build the response model
                 if (model.ScopesConsented != null && model.ScopesConsented.Any())
@@ -108,9 +58,6 @@ namespace IdentityServer4.Quickstart.UI.Device
                         RememberConsent = model.RememberConsent,
                         ScopesConsented = scopes.ToArray()
                     };
-
-                    // emit event
-                    await _events.RaiseAsync(new ConsentGrantedEvent(User.GetSubjectId(), request.ClientId, request.ScopesRequested, grantedConsent.ScopesConsented, grantedConsent.RememberConsent));
                 }
                 else
                 {
@@ -124,25 +71,28 @@ namespace IdentityServer4.Quickstart.UI.Device
 
             if (grantedConsent != null)
             {
+                // validate return url is still valid
+                var request = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
+                if (request == null) return result;
+
                 // communicate outcome of consent back to identityserver
-                await _interaction.HandleRequestAsync(model.UserCode, grantedConsent);
+                await _interaction.GrantConsentAsync(request, grantedConsent);
 
                 // indicate that's it ok to redirect back to authorization endpoint
                 result.RedirectUri = model.ReturnUrl;
-                result.ClientId = request.ClientId;
             }
             else
             {
                 // we need to redisplay the consent UI
-                result.ViewModel = await BuildViewModelAsync(model.UserCode, model);
+                result.ViewModel = await BuildViewModelAsync(model.ReturnUrl, model);
             }
 
             return result;
         }
 
-        private async Task<DeviceAuthorizationViewModel> BuildViewModelAsync(string userCode, DeviceAuthorizationInputModel model = null)
+        public async Task<ConsentViewModel> BuildViewModelAsync(string returnUrl, ConsentInputModel model = null)
         {
-            var request = await _interaction.GetAuthorizationContextAsync(userCode);
+            var request = await _interaction.GetAuthorizationContextAsync(returnUrl);
             if (request != null)
             {
                 var client = await _clientStore.FindEnabledClientByIdAsync(request.ClientId);
@@ -151,7 +101,7 @@ namespace IdentityServer4.Quickstart.UI.Device
                     var resources = await _resourceStore.FindEnabledResourcesByScopeAsync(request.ScopesRequested);
                     if (resources != null && (resources.IdentityResources.Any() || resources.ApiResources.Any()))
                     {
-                        return CreateConsentViewModel(userCode, model, client, resources);
+                        return CreateConsentViewModel(model, returnUrl, request, client, resources);
                     }
                     else
                     {
@@ -163,31 +113,35 @@ namespace IdentityServer4.Quickstart.UI.Device
                     _logger.LogError("Invalid client id: {0}", request.ClientId);
                 }
             }
+            else
+            {
+                _logger.LogError("No consent request matching request: {0}", returnUrl);
+            }
 
             return null;
         }
 
-        private DeviceAuthorizationViewModel CreateConsentViewModel(string userCode, DeviceAuthorizationInputModel model, Client client, Resources resources)
+        private ConsentViewModel CreateConsentViewModel(
+            ConsentInputModel model, string returnUrl, 
+            AuthorizationRequest request, 
+            Client client, Resources resources)
         {
-            var vm = new DeviceAuthorizationViewModel
-            {
-                UserCode = userCode,
+            var vm = new ConsentViewModel();
+            vm.RememberConsent = model?.RememberConsent ?? true;
+            vm.ScopesConsented = model?.ScopesConsented ?? Enumerable.Empty<string>();
 
-                RememberConsent = model?.RememberConsent ?? true,
-                ScopesConsented = model?.ScopesConsented ?? Enumerable.Empty<string>(),
-                
-                ClientName = client.ClientName ?? client.ClientId,
-                ClientUrl = client.ClientUri,
-                ClientLogoUrl = client.LogoUri,
-                AllowRememberConsent = client.AllowRememberConsent
-            };
+            vm.ReturnUrl = returnUrl;
+
+            vm.ClientName = client.ClientName ?? client.ClientId;
+            vm.ClientUrl = client.ClientUri;
+            vm.ClientLogoUrl = client.LogoUri;
+            vm.AllowRememberConsent = client.AllowRememberConsent;
 
             vm.IdentityScopes = resources.IdentityResources.Select(x => CreateScopeViewModel(x, vm.ScopesConsented.Contains(x.Name) || model == null)).ToArray();
             vm.ResourceScopes = resources.ApiResources.SelectMany(x => x.Scopes).Select(x => CreateScopeViewModel(x, vm.ScopesConsented.Contains(x.Name) || model == null)).ToArray();
             if (ConsentOptions.EnableOfflineAccess && resources.OfflineAccess)
             {
-                vm.ResourceScopes = vm.ResourceScopes.Union(new[]
-                {
+                vm.ResourceScopes = vm.ResourceScopes.Union(new ScopeViewModel[] {
                     GetOfflineAccessScope(vm.ScopesConsented.Contains(IdentityServer4.IdentityServerConstants.StandardScopes.OfflineAccess) || model == null)
                 });
             }
@@ -195,7 +149,7 @@ namespace IdentityServer4.Quickstart.UI.Device
             return vm;
         }
 
-        private ScopeViewModel CreateScopeViewModel(IdentityResource identity, bool check)
+        public ScopeViewModel CreateScopeViewModel(IdentityResource identity, bool check)
         {
             return new ScopeViewModel
             {
@@ -220,6 +174,7 @@ namespace IdentityServer4.Quickstart.UI.Device
                 Checked = check || scope.Required
             };
         }
+
         private ScopeViewModel GetOfflineAccessScope(bool check)
         {
             return new ScopeViewModel
@@ -233,3 +188,4 @@ namespace IdentityServer4.Quickstart.UI.Device
         }
     }
 }
+
