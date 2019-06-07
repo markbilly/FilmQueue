@@ -18,6 +18,8 @@ namespace FoodDiary.IdentityServer.ApiControllers
             _userManager = userManager;
         }
 
+        // TODO: Rate limiting and recaptcha or equivalent
+
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] CreateUserRequest createUserRequest)
         {
