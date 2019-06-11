@@ -4,14 +4,16 @@ using FoodDiary.WebApi.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace FoodDiary.WebApi.Migrations
 {
     [DbContext(typeof(FoodDiaryDbContext))]
-    partial class FoodDiaryDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190611105508_AddBasicEntities")]
+    partial class AddBasicEntities
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

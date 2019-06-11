@@ -12,7 +12,9 @@ namespace FoodDiary.WebApi.Infrastructure.Swagger
     {
         public void Apply(Operation operation, OperationFilterContext context)
         {
+#pragma warning disable CS0618 // Type or member is obsolete
             var hasAuthorizeAttribute = context.ApiDescription.ControllerAttributes().Concat(context.ApiDescription.ActionAttributes())
+#pragma warning restore CS0618 // Type or member is obsolete
                 .OfType<AuthorizeAttribute>()
                 .Any();
 

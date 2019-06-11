@@ -2,15 +2,24 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace FoodDiary.WebApi.Models
+namespace FoodDiary.WebApi.DataAccess.Models
 {
-    public class Meal
+    public class Food
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long Id { get; set; }
+
+        [Required]
         public string Name { get; set; }
+
+        [Required]
+        public DateTime CreatedDateTime { get; set; }
+
+        [Required]
+        public string CreatedByUserId { get; set; }
     }
 }
