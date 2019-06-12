@@ -28,8 +28,6 @@ namespace FoodDiary.WebApi.DataAccess
             {
                 Name = name
             });
-
-            await _dbContext.SaveChangesAsync();
         }
     }
 }

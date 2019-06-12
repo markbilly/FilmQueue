@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FoodDiary.WebApi.Domain;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -24,12 +25,5 @@ namespace FoodDiary.WebApi.DataAccess.Models
 
         [Required]
         public DateTime CreatedDateTime { get; set; }
-    }
-
-    public enum SymptomSeverity
-    {
-        Mild = 1,
-        Moderate = 2,
-        Severe = 3
     }
 }

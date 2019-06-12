@@ -11,6 +11,7 @@ namespace FoodDiary.WebApi.DataAccess
     public interface ISymptomReader : IDependency
     {
         Task<IEnumerable<Symptom>> Query(string searchTerm);
+        Task<Symptom> GetByName(string name);
     }
 
     public class SymptomReader : ISymptomReader
@@ -20,6 +21,11 @@ namespace FoodDiary.WebApi.DataAccess
         public SymptomReader(FoodDiaryDbContext dbContext)
         {
             _dbContext = dbContext;
+        }
+
+        public async Task<Symptom> GetByName(string name)
+        {
+            return await _dbContext.Symptoms.FirstOrDefaultAsync(symptom => name.Equals(symptom.Name, StringComparison.OrdinalIgnoreCase));
         }
 
         public async Task<IEnumerable<Symptom>> Query(string searchTerm)
