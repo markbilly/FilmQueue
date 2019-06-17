@@ -1,1 +1,1 @@
-dotnet run --project FoodDiary.IdentityServer
+dotnet run --project FilmQueue.IdentityServer

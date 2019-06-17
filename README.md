@@ -1,3 +1,5 @@
-# FoodDiary
+# Film Queue
 
-This is a Food Diary app.
+Make a note of all the films you want to watch.
+
+This app can give you a random one to watch each day.

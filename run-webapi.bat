@@ -1,1 +1,1 @@
-dotnet run --project FoodDiary.WebApi
+dotnet run --project FilmQueue.WebApi
