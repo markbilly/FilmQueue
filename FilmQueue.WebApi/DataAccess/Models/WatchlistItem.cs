@@ -7,13 +7,22 @@ using System.Threading.Tasks;
 
 namespace FilmQueue.WebApi.DataAccess.Models
 {
-    public class Symptom
+    public class WatchlistItem
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long Id { get; set; }
 
         [Required]
-        public string Name { get; set; }
+        public string Title { get; set; }
+
+        [Required]
+        public int RuntimeInMinutes { get; set; }
+
+        [Required]
+        public DateTime CreatedDateTime { get; set; }
+
+        [Required]
+        public string CreatedByUserId { get; set; }
     }
 }

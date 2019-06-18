@@ -18,9 +18,6 @@ namespace FilmQueue.WebApi.DataAccess
             base.OnModelCreating(modelBuilder);
         }
 
-        public DbSet<Food> Foods { get; set; }
-        public DbSet<FoodLog> FoodLogs { get; set; }
-        public DbSet<Symptom> Symptoms { get; set; }
-        public DbSet<SymptomLog> SymptomLogs { get; set; }
+        public DbSet<WatchlistItem> WatchlistItems { get; set; }
     }
 }

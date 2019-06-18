@@ -23,8 +23,8 @@ namespace FilmQueue.IdentityServer
 {
     public class Startup
     {
-        private static readonly string MVC_URL = "https://localhost:44355";
-        private static readonly string API_URL = "https://localhost:44335";
+        private static readonly string MVC_URL = "https://localhost:50504";
+        private static readonly string API_URL = "https://localhost:50506";
 
         public Startup(IConfiguration configuration)
         {

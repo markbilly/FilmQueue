@@ -5,9 +5,8 @@ using System.Threading.Tasks;
 
 namespace FilmQueue.WebApi.Domain
 {
-    public class CreateSymptomLogRequest
+    public class AddToWatchlistRequest
     {
-        public string SymptomName { get; set; }
-        public SymptomSeverity Severity { get; set; }
+        public string UserId { get; set; }
     }
 }

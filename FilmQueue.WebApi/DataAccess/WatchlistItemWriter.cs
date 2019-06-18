@@ -8,18 +8,18 @@ using System.Threading.Tasks;
 
 namespace FilmQueue.WebApi.DataAccess
 {
-    public interface ISymptomLogWriter : IDependency
+    public interface IWatchlistItemWriter : IDependency
     {
-        Task CreateSymptomLog(long symptomId, SymptomSeverity severity);
+        Task Create(string title, int runtimeInMinutes);
     }
 
-    public class SymptomLogWriter : ISymptomLogWriter
+    public class WatchlistItemWriter : IWatchlistItemWriter
     {
         private readonly ICurrentUserAccessor _currentUserAccessor;
         private readonly FilmQueueDbContext _dbContext;
         private readonly IClock _clock;
 
-        public SymptomLogWriter(
+        public WatchlistItemWriter(
             ICurrentUserAccessor currentUserAccessor,
             FilmQueueDbContext dbContext,
             IClock clock)
@@ -29,14 +29,14 @@ namespace FilmQueue.WebApi.DataAccess
             _clock = clock;
         }
 
-        public async Task CreateSymptomLog(long symptomId, SymptomSeverity severity)
+        public Task Create(string title, int runtimeInMinutes)
         {
-            await _dbContext.AddAsync(new SymptomLog
+            return _dbContext.AddAsync(new DataAccess.Models.WatchlistItem
             {
-                SymptomId = symptomId,
-                Severity = severity,
+                Title = title,
+                RuntimeInMinutes = runtimeInMinutes,
                 CreatedDateTime = _clock.UtcNow,
-                UserId = _currentUserAccessor.CurrentUser.Id
+                CreatedByUserId = _currentUserAccessor.CurrentUser.Id
             });
         }
     }

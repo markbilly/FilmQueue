@@ -15,7 +15,7 @@ namespace FilmQueue.IdentityServer
         public static void Main(string[] args)
         {
             CreateWebHostBuilder(args)
-                .UseUrls("https://localhost:44312")
+                .UseUrls("https://localhost:50505")
                 .Build()
                 .Run();
         }

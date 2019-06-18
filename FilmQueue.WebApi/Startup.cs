@@ -30,7 +30,7 @@ namespace FilmQueue.WebApi
 {
     public class Startup
     {
-        private static readonly string IDSERVER_URL = "https://localhost:44312";
+        private static readonly string IDSERVER_URL = "https://localhost:50505";
 
         public Startup(IConfiguration configuration)
         {

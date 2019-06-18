@@ -15,7 +15,7 @@ namespace FilmQueue.WebApi
         public static void Main(string[] args)
         {
             CreateWebHostBuilder(args)
-                .UseUrls("https://localhost:44335")
+                .UseUrls("https://localhost:50506")
                 .Build()
                 .Run();
         }

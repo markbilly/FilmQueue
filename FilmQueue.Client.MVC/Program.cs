@@ -15,7 +15,7 @@ namespace FilmQueue.Client.MVC
         public static void Main(string[] args)
         {
             CreateWebHostBuilder(args)
-                .UseUrls("https://localhost:44355")
+                .UseUrls("https://localhost:50504")
                 .Build()
                 .Run();
         }

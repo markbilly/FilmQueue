@@ -2,7 +2,7 @@
 
 namespace FilmQueue.WebApi.Migrations
 {
-    public partial class CreateDatabase : Migration
+    public partial class SetupDatabase : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

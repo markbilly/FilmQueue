@@ -14,7 +14,7 @@ namespace FilmQueue.Client.CLI
                 httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/x-www-form-urlencoded"));
 
                 var response = httpClient.PostAsync(
-                    "https://localhost:44312/connect/token",
+                    "https://localhost:50505/connect/token",
                     new StringContent(
                         "grant_type=client_credentials&scope=api.read&client_id=cli&client_secret=<secret_password>",
                         Encoding.UTF8,
