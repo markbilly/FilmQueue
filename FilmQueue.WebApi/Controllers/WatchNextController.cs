@@ -11,7 +11,7 @@ namespace FilmQueue.WebApi.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("api/watchlist/items/watchnext")]
+    [Route("api")]
     public class WatchNextController : ControllerBase
     {
         private readonly IWatchNextService _watchNextService;
@@ -21,7 +21,7 @@ namespace FilmQueue.WebApi.Controllers
             _watchNextService = watchNextServiceFactory.GetForCurrentUser();
         }
 
-        [HttpGet]
+        [HttpGet("watchlist/items/watchnext")]
         [ProducesResponseType(typeof(WatchlistItem), 200)]
         public async Task<IActionResult> GetWatchNext()
         {
@@ -35,9 +35,8 @@ namespace FilmQueue.WebApi.Controllers
             return Ok(current);
         }
 
-        [HttpPut]
-        [ProducesResponseType(typeof(WatchlistItem), 201)]
-        public async Task<IActionResult> SelectWatchNext()
+        [HttpPost("newwatchnextrequests")]
+        public async Task<IActionResult> GenerateWatchNext()
         {
             var current = await _watchNextService.GetCurrentWatchNextItem();
 
@@ -48,17 +47,22 @@ namespace FilmQueue.WebApi.Controllers
 
             var newItem = await _watchNextService.SelectNewWatchNextItem();
 
-            return CreatedAtAction(nameof(GetWatchNext), newItem);
+            return Ok();
         }
 
-        [HttpPut("iswatched")]
-        public async Task<IActionResult> MarkAsWatched()
+        [HttpPut("watchlist/items/watchnext")]
+        public async Task<IActionResult> UpdateWatchNext([FromBody] UpdateWatchNextRequest updateWatchNextRequest)
         {
             var current = await _watchNextService.GetCurrentWatchNextItem();
 
             if (current == null)
             {
                 return NotFound();
+            }
+
+            if (updateWatchNextRequest.IsWatched != true)
+            {
+                return BadRequest("Disallowed action. You may only set watch next item to 'watched'");
             }
 
             await _watchNextService.MarkCurrentWatchNextAsWatched();
