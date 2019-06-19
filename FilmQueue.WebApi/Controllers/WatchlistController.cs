@@ -4,7 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using FilmQueue.WebApi.DataAccess;
 using FilmQueue.WebApi.Domain;
+using FilmQueue.WebApi.Domain.Commands;
+using FilmQueue.WebApi.Domain.Events;
 using FilmQueue.WebApi.Infrastructure;
+using FilmQueue.WebApi.Infrastructure.Events;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,20 +19,17 @@ namespace FilmQueue.WebApi.Controllers
     public class WatchlistController : ControllerBase
     {
         private readonly ICurrentUserAccessor _currentUserAccessor;
-        private readonly IWatchlistItemWriter _watchlistItemWriter;
         private readonly IWatchlistReader _watchlistReader;
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IEventService _eventService;
 
         public WatchlistController(
             ICurrentUserAccessor currentUserAccessor,
-            IWatchlistItemWriter watchlistItemWriter,
             IWatchlistReader watchlistReader,
-            IUnitOfWork unitOfWork)
+            IEventService eventService)
         {
             _currentUserAccessor = currentUserAccessor;
-            _watchlistItemWriter = watchlistItemWriter;
             _watchlistReader = watchlistReader;
-            _unitOfWork = unitOfWork;
+            _eventService = eventService;
         }
         
         [HttpGet()]
@@ -50,24 +50,36 @@ namespace FilmQueue.WebApi.Controllers
             return Ok(new WatchlistItem(item.Title, item.RuntimeInMinutes));
         }
 
-        [HttpGet("items/watchnext")]
-        [ProducesResponseType(typeof(WatchlistItem), 200)]
-        public async Task<IActionResult> GetWatchNext()
-        {
-            var item = await _watchlistReader.GetRandomUnwatchedItem();
-
-            return Ok(new WatchlistItem(item.Title, item.RuntimeInMinutes));
-        }
-
         [HttpPost("items")]
+        [ProducesResponseType(typeof(WatchlistItem), 201)]
         public async Task<IActionResult> AddToWatchlist([FromBody] AddToWatchlistRequest addToWatchlistRequest)
         {
-            var item = await _unitOfWork.Execute(async () =>
+            WatchlistItemCreatedEvent createdEvent = null;
+            IDictionary<string, string> validationMessages = null;
+
+            await _eventService.Subscribe<WatchlistItemCreatedEvent>((e) =>
             {
-                return await _watchlistItemWriter.Create(addToWatchlistRequest.Title, addToWatchlistRequest.RuntimeInMinutes);
+                createdEvent = e;
             });
 
-            return CreatedAtAction(nameof(GetWatchlistItem), new { id = item.Id }, new WatchlistItem(item.Title, item.RuntimeInMinutes));
+            await _eventService.Subscribe<WatchlistItemCreationFailedEvent>((e) =>
+            {
+                validationMessages = e.ValidationMessages;
+            });
+
+            await _eventService.QueueCommand(new CreateWatchlistItemCommand
+            {
+                Title = addToWatchlistRequest.Title,
+                RuntimeInMinutes = addToWatchlistRequest.RuntimeInMinutes,
+                UserId = _currentUserAccessor.CurrentUser.Id
+            });
+
+            if (validationMessages != null)
+            {
+                return BadRequest(validationMessages);
+            }
+                        
+            return CreatedAtAction(nameof(GetWatchlistItem), new { id = createdEvent.ItemId }, createdEvent.Item);
         }
     }
 }
