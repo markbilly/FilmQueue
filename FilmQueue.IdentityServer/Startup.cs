@@ -63,7 +63,7 @@ namespace FilmQueue.IdentityServer
                     new Client
                     {
                         ClientId = "cli",
-                        ClientName = "Food Diary CLI",
+                        ClientName = "Film Queue CLI",
                         AllowedGrantTypes = GrantTypes.ClientCredentials,
                         ClientSecrets = new[] { new Secret("<secret_password>".Sha256()) },
                         AllowedScopes = new[] { "api.cli" }
@@ -71,7 +71,7 @@ namespace FilmQueue.IdentityServer
                     new Client
                     {
                         ClientId = "api_swagger",
-                        ClientName = "Food Diary Web API - Swagger UI",
+                        ClientName = "Film Queue Web API - Swagger UI",
                         AllowedGrantTypes = GrantTypes.Implicit,
                         AllowAccessTokensViaBrowser = true,
                         RedirectUris = new[] { API_URL + "/swagger/oauth2-redirect.html" },
@@ -80,7 +80,7 @@ namespace FilmQueue.IdentityServer
                     new Client
                     {
                         ClientId = "web",
-                        ClientName = "Food Diary Web App",
+                        ClientName = "Film Queue Web App",
                         AllowedGrantTypes = GrantTypes.Implicit,
                         AllowedScopes = new[]
                         {
@@ -103,8 +103,8 @@ namespace FilmQueue.IdentityServer
                     new ApiResource
                     {
                         Name = "api",
-                        DisplayName = "Food Diary API",
-                        Description = "Food Diary API Access",
+                        DisplayName = "Film Queue API",
+                        Description = "Film Queue API Access",
                         ApiSecrets = new[] { new Secret("<scope_secret>".Sha256()) },
                         Scopes = new[]
                         {
@@ -120,7 +120,7 @@ namespace FilmQueue.IdentityServer
 
             services.AddSwaggerGen(options =>
             {
-                options.SwaggerDoc("v1", new Info { Title = "Food Diary Identity Web API", Version = "v1" });
+                options.SwaggerDoc("v1", new Info { Title = "Film Queue Identity Web API", Version = "v1" });
             });
         }
 
@@ -137,7 +137,7 @@ namespace FilmQueue.IdentityServer
             app.UseSwagger();
             app.UseSwaggerUI(options =>
             {
-                options.SwaggerEndpoint("/swagger/v1/swagger.json", "Food Diary Identity Web API V1");
+                options.SwaggerEndpoint("/swagger/v1/swagger.json", "Film Queue Identity Web API V1");
                 options.DefaultModelsExpandDepth(-1);
             });
 

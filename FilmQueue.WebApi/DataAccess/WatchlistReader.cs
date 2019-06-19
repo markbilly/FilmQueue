@@ -10,7 +10,9 @@ namespace FilmQueue.WebApi.DataAccess
 {
     public interface IWatchlistReader : IDependency
     {
-        Task<IEnumerable<WatchlistItem>> GetItemsByUserId(string userId);
+        Task<IEnumerable<WatchlistItem>> GetItemsByUserId(string userId, int take = 5, int skip = 0);
+        Task<WatchlistItem> GetItemById(long id);
+        Task<WatchlistItem> GetRandomUnwatchedItem();
     }
 
     public class WatchlistReader : IWatchlistReader
@@ -22,12 +24,30 @@ namespace FilmQueue.WebApi.DataAccess
             _dbContext = dbContext;
         }
 
-        public async Task<IEnumerable<WatchlistItem>> GetItemsByUserId(string userId)
+        public Task<WatchlistItem> GetItemById(long id)
+        {
+            return _dbContext.WatchlistItems.FirstOrDefaultAsync(item => item.Id == id);
+        }
+
+        public async Task<IEnumerable<WatchlistItem>> GetItemsByUserId(string userId, int take = 5, int skip = 0)
         {
             return await _dbContext.WatchlistItems
                 .Where(item => item.CreatedByUserId.Equals(userId))
+                .OrderByDescending(item => item.CreatedDateTime)
+                .Skip(skip)
+                .Take(take)
                 .ToListAsync()
                 .ConfigureAwait(false);
+        }
+
+        public async Task<WatchlistItem> GetRandomUnwatchedItem()
+        {
+            var unwatchedItems = _dbContext.WatchlistItems;
+
+            var count = await unwatchedItems.CountAsync();
+            var item = await unwatchedItems.Skip(new Random().Next(count)).FirstOrDefaultAsync();
+
+            return item;
         }
     }
 }

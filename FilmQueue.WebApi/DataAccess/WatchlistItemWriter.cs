@@ -1,5 +1,4 @@
 ﻿using FilmQueue.WebApi.DataAccess.Models;
-using FilmQueue.WebApi.Domain;
 using FilmQueue.WebApi.Infrastructure;
 using System;
 using System.Collections.Generic;
@@ -10,7 +9,7 @@ namespace FilmQueue.WebApi.DataAccess
 {
     public interface IWatchlistItemWriter : IDependency
     {
-        Task Create(string title, int runtimeInMinutes);
+        Task<WatchlistItem> Create(string title, int runtimeInMinutes);
     }
 
     public class WatchlistItemWriter : IWatchlistItemWriter
@@ -29,15 +28,17 @@ namespace FilmQueue.WebApi.DataAccess
             _clock = clock;
         }
 
-        public Task Create(string title, int runtimeInMinutes)
+        public async Task<WatchlistItem> Create(string title, int runtimeInMinutes)
         {
-            return _dbContext.AddAsync(new DataAccess.Models.WatchlistItem
+            var created = await _dbContext.AddAsync(new WatchlistItem
             {
                 Title = title,
                 RuntimeInMinutes = runtimeInMinutes,
                 CreatedDateTime = _clock.UtcNow,
                 CreatedByUserId = _currentUserAccessor.CurrentUser.Id
             });
+
+            return created.Entity;
         }
     }
 }

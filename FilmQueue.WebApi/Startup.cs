@@ -59,14 +59,14 @@ namespace FilmQueue.WebApi
 
             services.AddSwaggerGen(options =>
             {
-                options.SwaggerDoc("v1", new Info { Title = "Food Diary Web API", Version = "v1" });
+                options.SwaggerDoc("v1", new Info { Title = "Film Queue Web API", Version = "v1" });
                 options.AddSecurityDefinition("oauth2", new OAuth2Scheme
                 {
                     Flow = "implicit",
                     AuthorizationUrl = IDSERVER_URL + "/connect/authorize",
                     Scopes = new Dictionary<string, string>
                     {
-                        { "api.all", "Food Diary Web API - full access" }
+                        { "api.all", "Film Queue Web API - full access" }
                     }
                 });
                 options.OperationFilter<AuthorizeCheckOperationFilter>();
@@ -104,10 +104,10 @@ namespace FilmQueue.WebApi
             app.UseSwagger();
             app.UseSwaggerUI(options =>
             {
-                options.SwaggerEndpoint("/swagger/v1/swagger.json", "Food Diary Web API V1");
+                options.SwaggerEndpoint("/swagger/v1/swagger.json", "Film Queue Web API V1");
                 options.DefaultModelsExpandDepth(-1);
                 options.OAuthClientId("api_swagger");
-                options.OAuthAppName("Food Diary Web API - Swagger");
+                options.OAuthAppName("Film Queue Web API - Swagger");
             });
 
             JsonConvert.DefaultSettings = () =>

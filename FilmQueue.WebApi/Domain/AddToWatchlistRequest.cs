@@ -7,6 +7,7 @@ namespace FilmQueue.WebApi.Domain
 {
     public class AddToWatchlistRequest
     {
-        public string UserId { get; set; }
+        public string Title { get; set; }
+        public int RuntimeInMinutes { get; set; }
     }
 }
