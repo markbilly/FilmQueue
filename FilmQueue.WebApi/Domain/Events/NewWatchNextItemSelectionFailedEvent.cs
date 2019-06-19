@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FilmQueue.WebApi.Domain.Events
 {
-    public class WatchlistItemCreationFailedEvent : IEvent
+    public class NewWatchNextItemSelectionFailedEvent : IEvent
     {
         public IDictionary<string, string> ValidationMessages { get; set; } = new Dictionary<string, string>();
     }

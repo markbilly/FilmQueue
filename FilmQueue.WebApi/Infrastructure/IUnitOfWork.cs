@@ -9,5 +9,7 @@ namespace FilmQueue.WebApi.Infrastructure
     {
         Task<T> Execute<T>(Func<Task<T>> work);
         Task Execute(Func<Task> work);
+
+        void Execute(Action work);
     }
 }

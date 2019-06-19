@@ -1,5 +1,9 @@
-﻿using FilmQueue.WebApi.Domain;
+﻿using FilmQueue.WebApi.DataAccess;
+using FilmQueue.WebApi.Domain;
+using FilmQueue.WebApi.Domain.Commands;
+using FilmQueue.WebApi.Domain.Events;
 using FilmQueue.WebApi.Infrastructure;
+using FilmQueue.WebApi.Infrastructure.Events;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -14,58 +18,84 @@ namespace FilmQueue.WebApi.Controllers
     [Route("api")]
     public class WatchNextController : ControllerBase
     {
-        private readonly IWatchNextService _watchNextService;
+        private readonly ICurrentUserAccessor _currentUserAccessor;
+        private readonly IWatchlistReader _watchlistReader;
+        private readonly IEventService _eventService;
 
-        public WatchNextController(IWatchNextServiceFactory watchNextServiceFactory)
+        public WatchNextController(
+            ICurrentUserAccessor currentUserAccessor,
+            IWatchlistReader watchlistReader,
+            IEventService eventService)
         {
-            _watchNextService = watchNextServiceFactory.GetForCurrentUser();
+            _currentUserAccessor = currentUserAccessor;
+            _watchlistReader = watchlistReader;
+            _eventService = eventService;
         }
 
         [HttpGet("watchlist/items/watchnext")]
         [ProducesResponseType(typeof(WatchlistItem), 200)]
         public async Task<IActionResult> GetWatchNext()
         {
-            var current = await _watchNextService.GetCurrentWatchNextItem();
+            var current = await _watchlistReader.GetCurrentWatchNextItem(_currentUserAccessor.CurrentUser.Id);
 
             if (current == null)
             {
                 return NotFound();
             }
 
-            return Ok(current);
+            return Ok(new WatchlistItem(current.Title, current.RuntimeInMinutes));
         }
 
         [HttpPost("newwatchnextrequests")]
-        public async Task<IActionResult> GenerateWatchNext()
+        public async Task<IActionResult> SelectNewWatchNextItem()
         {
-            var current = await _watchNextService.GetCurrentWatchNextItem();
+            IDictionary<string, string> validationMessages = null;
 
-            if (current != null)
+            await _eventService.Subscribe<NewWatchNextItemSelectionFailedEvent>((e) =>
             {
-                return BadRequest("You already have a watch next item. Mark it as watched or skipped first.");
+                validationMessages = e.ValidationMessages;
+            });
+
+            await _eventService.QueueCommand(new SelectNewWatchNextItemCommand
+            {
+                UserId = _currentUserAccessor.CurrentUser.Id
+            });
+
+            if (validationMessages != null)
+            {
+                return BadRequest(validationMessages);
             }
 
-            var newItem = await _watchNextService.SelectNewWatchNextItem();
-
-            return Ok();
+            return NoContent();
         }
 
         [HttpPut("watchlist/items/watchnext")]
         public async Task<IActionResult> UpdateWatchNext([FromBody] UpdateWatchNextRequest updateWatchNextRequest)
         {
-            var current = await _watchNextService.GetCurrentWatchNextItem();
+            bool notFound = false;
+            IDictionary<string, string> validationMessages = null;
 
-            if (current == null)
+            await _eventService.Subscribe<WatchNextItemUpdateFailedEvent>((e) =>
+            {
+                notFound = e.NoWatchNextItemFound;
+                validationMessages = e.ValidationMessages;
+            });
+
+            await _eventService.QueueCommand(new UpdateWatchNextItemCommand
+            {
+                UserId = _currentUserAccessor.CurrentUser.Id,
+                IsWatchedValue = updateWatchNextRequest.IsWatched
+            });
+
+            if (notFound)
             {
                 return NotFound();
             }
 
-            if (updateWatchNextRequest.IsWatched != true)
+            if (validationMessages != null)
             {
-                return BadRequest("Disallowed action. You may only set watch next item to 'watched'");
+                return BadRequest(validationMessages);
             }
-
-            await _watchNextService.MarkCurrentWatchNextAsWatched();
 
             return NoContent();
         }

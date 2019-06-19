@@ -30,5 +30,12 @@ namespace FilmQueue.WebApi.DataAccess
 
             await _dbContext.SaveChangesAsync();
         }
+
+        public void Execute(Action work)
+        {
+            work();
+
+            _dbContext.SaveChanges();
+        }
     }
 }

@@ -24,5 +24,10 @@ namespace FilmQueue.WebApi.DataAccess.Models
 
         [Required]
         public string CreatedByUserId { get; set; }
+
+        public DateTime? WatchNextStart { get; set; }
+        public DateTime? WatchNextEnd { get; set; }
+
+        public DateTime? WatchedDateTime { get; set; }
     }
 }

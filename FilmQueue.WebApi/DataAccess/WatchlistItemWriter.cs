@@ -10,6 +10,9 @@ namespace FilmQueue.WebApi.DataAccess
     public interface IWatchlistItemWriter : IDependency
     {
         Task<WatchlistItem> Create(string userId, string title, int runtimeInMinutes);
+        void SetWatchNextStartDateToNow(long id);
+        void SetWatchNextEndDateToNow(long id);
+        void SetWatchedDateToNow(long id);
     }
 
     public class WatchlistItemWriter : IWatchlistItemWriter
@@ -36,6 +39,42 @@ namespace FilmQueue.WebApi.DataAccess
             });
 
             return created.Entity;
+        }
+
+        public void SetWatchedDateToNow(long id)
+        {
+            var item = _dbContext.WatchlistItems.SingleOrDefault(x => x.Id == id);
+
+            if (item == null)
+            {
+                return;
+            }
+
+            item.WatchedDateTime = _clock.UtcNow;
+        }
+
+        public void SetWatchNextEndDateToNow(long id)
+        {
+            var item = _dbContext.WatchlistItems.SingleOrDefault(x => x.Id == id);
+
+            if (item == null)
+            {
+                return;
+            }
+
+            item.WatchNextEnd = _clock.UtcNow;
+        }
+
+        public void SetWatchNextStartDateToNow(long id)
+        {
+            var item = _dbContext.WatchlistItems.SingleOrDefault(x => x.Id == id);
+
+            if (item == null)
+            {
+                return;
+            }
+
+            item.WatchNextStart = _clock.UtcNow;
         }
     }
 }

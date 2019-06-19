@@ -11,34 +11,37 @@ using System.Threading.Tasks;
 
 namespace FilmQueue.WebApi.Domain.CommandHandlers
 {
-    public class CreateWatchlistItemCommandHandler : ICommandHandler<CreateWatchlistItemCommand>
+    public class SelectNewWatchNextItemCommandHandler : ICommandHandler<SelectNewWatchNextItemCommand>
     {
         private readonly IWatchlistItemWriter _watchlistItemWriter;
         private readonly IValidationService _validationService;
+        private readonly IWatchlistReader _watchlistReader;
         private readonly IEventService _eventService;
         private readonly IUnitOfWork _unitOfWork;
 
-        public CreateWatchlistItemCommandHandler(
+        public SelectNewWatchNextItemCommandHandler(
             IWatchlistItemWriter watchlistItemWriter,
             IValidationService validationService,
+            IWatchlistReader watchlistReader,
             IEventService eventService,
             IUnitOfWork unitOfWork)
         {
             _watchlistItemWriter = watchlistItemWriter;
             _validationService = validationService;
+            _watchlistReader = watchlistReader;
             _eventService = eventService;
             _unitOfWork = unitOfWork;
         }
 
-        public async Task Execute(CreateWatchlistItemCommand command)
+        public async Task Execute(SelectNewWatchNextItemCommand command)
         {
-            var validationContext = new ValidationContext<CreateWatchlistItemCommand>(command);
+            var validationContext = new ValidationContext<SelectNewWatchNextItemCommand>(command);
 
             await _validationService.Validate(validationContext);
 
             if (!validationContext.IsValid)
             {
-                await _eventService.RaiseEvent(new WatchlistItemCreationFailedEvent
+                await _eventService.RaiseEvent(new NewWatchNextItemSelectionFailedEvent
                 {
                     ValidationMessages = validationContext.ValidationMessages
                 });
@@ -46,15 +49,16 @@ namespace FilmQueue.WebApi.Domain.CommandHandlers
                 return;
             }
 
-            var item = await _unitOfWork.Execute(async () =>
+            var randomUnwatchedItem = await _watchlistReader.GetRandomUnwatchedItem(command.UserId);
+
+            _unitOfWork.Execute(() =>
             {
-                return await _watchlistItemWriter.Create(command.UserId, command.Title, command.RuntimeInMinutes);
+                _watchlistItemWriter.SetWatchNextStartDateToNow(randomUnwatchedItem.Id);
             });
 
-            await _eventService.RaiseEvent(new WatchlistItemCreatedEvent
+            await _eventService.RaiseEvent(new NewWatchNextItemSelectedEvent
             {
-                ItemId = item.Id,
-                Item = new WatchlistItem(item.Title, item.RuntimeInMinutes)
+                ItemId = randomUnwatchedItem.Id
             });
         }
     }
