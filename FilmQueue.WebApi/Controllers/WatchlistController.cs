@@ -6,6 +6,7 @@ using FilmQueue.WebApi.DataAccess;
 using FilmQueue.WebApi.Domain;
 using FilmQueue.WebApi.Domain.Commands;
 using FilmQueue.WebApi.Domain.Events;
+using FilmQueue.WebApi.Domain.Models;
 using FilmQueue.WebApi.Domain.Requests;
 using FilmQueue.WebApi.Domain.Responses;
 using FilmQueue.WebApi.Infrastructure;
@@ -21,67 +22,34 @@ namespace FilmQueue.WebApi.Controllers
     public class WatchlistController : ControllerBase
     {
         private readonly ICurrentUserAccessor _currentUserAccessor;
-        private readonly IWatchlistReader _watchlistReader;
+        private readonly IWatchlistItemReader _watchlistItemReader;
         private readonly IEventService _eventService;
 
         public WatchlistController(
             ICurrentUserAccessor currentUserAccessor,
-            IWatchlistReader watchlistReader,
+            IWatchlistItemReader watchlistItemReader,
             IEventService eventService)
         {
             _currentUserAccessor = currentUserAccessor;
-            _watchlistReader = watchlistReader;
+            _watchlistItemReader = watchlistItemReader;
             _eventService = eventService;
         }
         
-        [HttpGet()]
+        [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<QueryResponse<string>>), 200)]
-        public async Task<IActionResult> GetWatchlistItems(int page = 1, int pageSize = 5)
+        public async Task<IActionResult> GetWatchlist(int page = 1, int pageSize = 5)
         {
-            var items = await _watchlistReader.GetItemsByUserId(_currentUserAccessor.CurrentUser.Id, pageSize, (page - 1) * pageSize);
+            var records = await _watchlistItemReader.GetItemsByUserId(_currentUserAccessor.CurrentUser.Id, pageSize, (page - 1) * pageSize);
 
-            return Ok(QueryResponse<WatchlistItem>.FromEnumerable(items, item => new WatchlistItem(item.Title, item.RuntimeInMinutes)));
-        }
-
-        [HttpGet("items/{id}")]
-        [ProducesResponseType(typeof(WatchlistItem), 200)]
-        public async Task<IActionResult> GetWatchlistItem([FromRoute] long id)
-        {
-            var item = await _watchlistReader.GetItemById(id);
-
-            return Ok(new WatchlistItem(item.Title, item.RuntimeInMinutes));
-        }
-
-        [HttpPost("items")]
-        [ProducesResponseType(typeof(WatchlistItem), 201)]
-        public async Task<IActionResult> AddToWatchlist([FromBody] AddToWatchlistRequest addToWatchlistRequest)
-        {
-            WatchlistItemCreatedEvent createdEvent = null;
-            IDictionary<string, string> validationMessages = null;
-
-            await _eventService.Subscribe<WatchlistItemCreatedEvent>((e) =>
+            var items = records.Select(record => new WatchlistItem
             {
-                createdEvent = e;
+                Id = record.Id,
+                Title = record.Title,
+                RuntimeInMinutes = record.RuntimeInMinutes,
+                Watched = record.WatchedDateTime.HasValue
             });
 
-            await _eventService.Subscribe<WatchlistItemCreationFailedEvent>((e) =>
-            {
-                validationMessages = e.ValidationMessages;
-            });
-
-            await _eventService.QueueCommand(new CreateWatchlistItemCommand
-            {
-                Title = addToWatchlistRequest.Title,
-                RuntimeInMinutes = addToWatchlistRequest.RuntimeInMinutes,
-                UserId = _currentUserAccessor.CurrentUser.Id
-            });
-
-            if (validationMessages != null)
-            {
-                return BadRequest(validationMessages);
-            }
-                        
-            return CreatedAtAction(nameof(GetWatchlistItem), new { id = createdEvent.ItemId }, createdEvent.Item);
+            return Ok(QueryResponse<WatchlistItemResponse>.FromEnumerable(items, item => new WatchlistItemResponse(item)));
         }
     }
 }

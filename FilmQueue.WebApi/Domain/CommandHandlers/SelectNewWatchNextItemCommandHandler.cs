@@ -14,21 +14,21 @@ namespace FilmQueue.WebApi.Domain.CommandHandlers
     public class SelectNewWatchNextItemCommandHandler : ICommandHandler<SelectNewWatchNextItemCommand>
     {
         private readonly IWatchlistItemWriter _watchlistItemWriter;
+        private readonly IWatchlistItemReader _watchlistItemReader;
         private readonly IValidationService _validationService;
-        private readonly IWatchlistReader _watchlistReader;
         private readonly IEventService _eventService;
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly FilmQueueDbUnitOfWork _unitOfWork;
 
         public SelectNewWatchNextItemCommandHandler(
             IWatchlistItemWriter watchlistItemWriter,
+            IWatchlistItemReader watchlistItemReader,
             IValidationService validationService,
-            IWatchlistReader watchlistReader,
             IEventService eventService,
-            IUnitOfWork unitOfWork)
+            FilmQueueDbUnitOfWork unitOfWork)
         {
             _watchlistItemWriter = watchlistItemWriter;
+            _watchlistItemReader = watchlistItemReader;
             _validationService = validationService;
-            _watchlistReader = watchlistReader;
             _eventService = eventService;
             _unitOfWork = unitOfWork;
         }
@@ -48,7 +48,7 @@ namespace FilmQueue.WebApi.Domain.CommandHandlers
                 return;
             }
 
-            var randomUnwatchedItem = await _watchlistReader.GetRandomUnwatchedItem(command.UserId);
+            var randomUnwatchedItem = await _watchlistItemReader.GetRandomUnwatchedItem(command.UserId);
 
             _unitOfWork.Execute(() =>
             {

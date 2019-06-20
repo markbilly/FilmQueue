@@ -1,4 +1,5 @@
-﻿using FilmQueue.WebApi.Infrastructure.Events;
+﻿using FilmQueue.WebApi.Domain.Models;
+using FilmQueue.WebApi.Infrastructure.Events;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +9,6 @@ namespace FilmQueue.WebApi.Domain.Events
 {
     public class WatchNextItemUpdatedEvent : IEvent
     {
-        public long ItemId { get; set; }
+        public WatchlistItem Item { get; set; }
     }
 }

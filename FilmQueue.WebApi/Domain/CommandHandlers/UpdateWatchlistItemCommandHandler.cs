@@ -12,54 +12,59 @@ using System.Threading.Tasks;
 
 namespace FilmQueue.WebApi.Domain.CommandHandlers
 {
-    public class CreateWatchlistItemCommandHandler : ICommandHandler<CreateWatchlistItemCommand>
+    public class UpdateWatchlistItemCommandHandler : ICommandHandler<UpdateWatchlistItemCommand>
     {
-        private readonly IWatchlistItemWriter _watchlistItemWriter;
+        private readonly IWatchlistItemReader _watchlistItemReader;
         private readonly IValidationService _validationService;
         private readonly IEventService _eventService;
         private readonly FilmQueueDbUnitOfWork _unitOfWork;
 
-        public CreateWatchlistItemCommandHandler(
-            IWatchlistItemWriter watchlistItemWriter,
+        public UpdateWatchlistItemCommandHandler(
+            IWatchlistItemReader watchlistItemReader,
             IValidationService validationService,
             IEventService eventService,
             FilmQueueDbUnitOfWork unitOfWork)
         {
-            _watchlistItemWriter = watchlistItemWriter;
+            _watchlistItemReader = watchlistItemReader;
             _validationService = validationService;
             _eventService = eventService;
             _unitOfWork = unitOfWork;
         }
 
-        public async Task Execute(CreateWatchlistItemCommand command)
+        public async Task Execute(UpdateWatchlistItemCommand command)
         {
-            var validationContext = new ValidationContext<CreateWatchlistItemCommand>(command);
+            var validationContext = new ValidationContext<UpdateWatchlistItemCommand>(command);
             await _validationService.Validate(validationContext);
 
             if (!validationContext.IsValid)
             {
-                await _eventService.RaiseEvent(new WatchlistItemCreationFailedEvent
+                await _eventService.RaiseEvent(new WatchlistItemUpdateFailedEvent
                 {
+                    ItemNotFound = validationContext.ValidationMessages.ContainsKey("notfound"),
                     ValidationMessages = validationContext.ValidationMessages
                 });
 
                 return;
             }
 
-            var record = await _unitOfWork.Execute(async () =>
+            var item = await _watchlistItemReader.GetItemById(command.ItemId);
+
+            _unitOfWork.Execute(() =>
             {
-                return await _watchlistItemWriter.Create(command.UserId, command.Title, command.RuntimeInMinutes);
+                item.Title = command.Title;
+                item.RuntimeInMinutes = command.RuntimeInMinutes;
+
+                // TODO: Audit the changes
             });
 
-            await _eventService.RaiseEvent(new WatchlistItemCreatedEvent
+            await _eventService.RaiseEvent(new WatchlistItemUpdatedEvent
             {
-                ItemId = record.Id,
                 Item = new WatchlistItem
                 {
-                    Id = record.Id,
-                    Title = record.Title,
-                    RuntimeInMinutes = record.RuntimeInMinutes,
-                    Watched = record.WatchedDateTime.HasValue
+                    Id = item.Id,
+                    Title = item.Title,
+                    RuntimeInMinutes = item.RuntimeInMinutes,
+                    Watched = item.WatchedDateTime.HasValue
                 }
             });
         }

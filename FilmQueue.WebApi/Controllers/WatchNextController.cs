@@ -2,7 +2,9 @@
 using FilmQueue.WebApi.Domain;
 using FilmQueue.WebApi.Domain.Commands;
 using FilmQueue.WebApi.Domain.Events;
+using FilmQueue.WebApi.Domain.Models;
 using FilmQueue.WebApi.Domain.Requests;
+using FilmQueue.WebApi.Domain.Responses;
 using FilmQueue.WebApi.Infrastructure;
 using FilmQueue.WebApi.Infrastructure.Events;
 using Microsoft.AspNetCore.Authorization;
@@ -20,31 +22,39 @@ namespace FilmQueue.WebApi.Controllers
     public class WatchNextController : ControllerBase
     {
         private readonly ICurrentUserAccessor _currentUserAccessor;
-        private readonly IWatchlistReader _watchlistReader;
+        private readonly IWatchlistItemReader _watchlistItemReader;
         private readonly IEventService _eventService;
 
         public WatchNextController(
             ICurrentUserAccessor currentUserAccessor,
-            IWatchlistReader watchlistReader,
+            IWatchlistItemReader watchlistItemReader,
             IEventService eventService)
         {
             _currentUserAccessor = currentUserAccessor;
-            _watchlistReader = watchlistReader;
+            _watchlistItemReader = watchlistItemReader;
             _eventService = eventService;
         }
 
         [HttpGet("watchlist/items/watchnext")]
-        [ProducesResponseType(typeof(WatchlistItem), 200)]
+        [ProducesResponseType(typeof(WatchlistItemResponse), 200)]
         public async Task<IActionResult> GetWatchNext()
         {
-            var current = await _watchlistReader.GetCurrentWatchNextItem(_currentUserAccessor.CurrentUser.Id);
+            var record = await _watchlistItemReader.GetCurrentWatchNextItem(_currentUserAccessor.CurrentUser.Id);
 
-            if (current == null)
+            if (record == null)
             {
                 return NotFound();
             }
 
-            return Ok(new WatchlistItem(current.Title, current.RuntimeInMinutes));
+            var item = new WatchlistItem
+            {
+                Id = record.Id,
+                Title = record.Title,
+                RuntimeInMinutes = record.RuntimeInMinutes,
+                Watched = record.WatchedDateTime.HasValue
+            };
+
+            return Ok(new WatchlistItemResponse(item));
         }
 
         [HttpPost("newwatchnextrequests")]

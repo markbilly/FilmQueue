@@ -16,6 +16,17 @@ namespace FilmQueue.WebApi.Domain.Validators
             if (string.IsNullOrWhiteSpace(validationContext.ValidationTarget.Title))
             {
                 validationContext.ValidationMessages.Add("title", "Title is a required field");
+                return Task.CompletedTask;
+            }
+
+            if (validationContext.ValidationTarget.Title.Length > 200)
+            {
+                validationContext.ValidationMessages.Add("title", "Title cannot be longer than 200 characters.");
+            }
+
+            if (validationContext.ValidationTarget.RuntimeInMinutes <= 0)
+            {
+                validationContext.ValidationMessages.Add("title", "Runtime is not valid. Must be positive whole number.");
             }
 
             return Task.CompletedTask;

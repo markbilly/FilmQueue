@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace FilmQueue.WebApi.Domain.Requests
 {
-    public class AddToWatchlistRequest
+    public class CreateToWatchlistItemRequest
     {
         public string Title { get; set; }
         public int RuntimeInMinutes { get; set; }

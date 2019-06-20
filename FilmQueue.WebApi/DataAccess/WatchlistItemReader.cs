@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace FilmQueue.WebApi.DataAccess
 {
-    public interface IWatchlistReader : IDependency
+    public interface IWatchlistItemReader : IDependency
     {
         Task<IEnumerable<WatchlistItemRecord>> GetItemsByUserId(string userId, int take = 5, int skip = 0);
         Task<WatchlistItemRecord> GetItemById(long id);
@@ -17,11 +17,11 @@ namespace FilmQueue.WebApi.DataAccess
         Task<int> GetUnwatchedItemCount(string userId);
     }
 
-    public class WatchlistReader : IWatchlistReader
+    public class WatchlistItemReader : IWatchlistItemReader
     {
         private readonly FilmQueueDbContext _dbContext;
 
-        public WatchlistReader(FilmQueueDbContext dbContext)
+        public WatchlistItemReader(FilmQueueDbContext dbContext)
         {
             _dbContext = dbContext;
         }

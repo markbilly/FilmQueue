@@ -1,6 +1,7 @@
 ﻿using FilmQueue.WebApi.DataAccess;
 using FilmQueue.WebApi.Domain.Commands;
 using FilmQueue.WebApi.Domain.Events;
+using FilmQueue.WebApi.Domain.Models;
 using FilmQueue.WebApi.Infrastructure;
 using FilmQueue.WebApi.Infrastructure.Events;
 using FilmQueue.WebApi.Infrastructure.Validation;
@@ -14,21 +15,21 @@ namespace FilmQueue.WebApi.Domain.CommandHandlers
     public class UpdateWatchNextItemCommandHandler : ICommandHandler<UpdateWatchNextItemCommand>
     {
         private readonly IWatchlistItemWriter _watchlistItemWriter;
+        private readonly IWatchlistItemReader _watchlistItemReader;
         private readonly IValidationService _validationService;
-        private readonly IWatchlistReader _watchlistReader;
         private readonly IEventService _eventService;
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly FilmQueueDbUnitOfWork _unitOfWork;
 
         public UpdateWatchNextItemCommandHandler(
             IWatchlistItemWriter watchlistItemWriter,
+            IWatchlistItemReader watchlistItemReader,
             IValidationService validationService,
-            IWatchlistReader watchlistReader,
             IEventService eventService,
-            IUnitOfWork unitOfWork)
+            FilmQueueDbUnitOfWork unitOfWork)
         {
             _watchlistItemWriter = watchlistItemWriter;
+            _watchlistItemReader = watchlistItemReader;
             _validationService = validationService;
-            _watchlistReader = watchlistReader;
             _eventService = eventService;
             _unitOfWork = unitOfWork;
         }
@@ -49,17 +50,25 @@ namespace FilmQueue.WebApi.Domain.CommandHandlers
                 return;
             }
 
-            var current = await _watchlistReader.GetCurrentWatchNextItem(command.UserId);
+            var current = await _watchlistItemReader.GetCurrentWatchNextItem(command.UserId);
 
             _unitOfWork.Execute(() =>
             {
                 _watchlistItemWriter.SetWatchedDateToNow(current.Id);
                 _watchlistItemWriter.SetWatchNextEndDateToNow(current.Id);
+
+                // TODO: Audit the changes
             });
 
             await _eventService.RaiseEvent(new WatchNextItemUpdatedEvent
             {
-                ItemId = current.Id
+                Item = new WatchlistItem
+                {
+                    Id = current.Id,
+                    Title = current.Title,
+                    RuntimeInMinutes = current.RuntimeInMinutes,
+                    Watched = current.WatchedDateTime.HasValue
+                }
             });
         }
     }

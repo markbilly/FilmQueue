@@ -10,24 +10,23 @@ namespace FilmQueue.WebApi.Domain.Validators
 {
     public class SelectNewWatchNextItemCommandValidator : IValidator<SelectNewWatchNextItemCommand>
     {
-        private readonly IWatchlistReader _watchlistReader;
+        private readonly IWatchlistItemReader _watchlistItemReader;
 
-        public SelectNewWatchNextItemCommandValidator(
-            IWatchlistReader watchlistReader)
+        public SelectNewWatchNextItemCommandValidator(IWatchlistItemReader watchlistItemReader)
         {
-            _watchlistReader = watchlistReader;
+            _watchlistItemReader = watchlistItemReader;
         }
 
         public async Task Validate(ValidationContext<SelectNewWatchNextItemCommand> validationContext)
         {
-            var current = await _watchlistReader.GetCurrentWatchNextItem(validationContext.ValidationTarget.UserId);
+            var current = await _watchlistItemReader.GetCurrentWatchNextItem(validationContext.ValidationTarget.UserId);
             if (current != null)
             {
                 validationContext.ValidationMessages.Add("state", "You already have a watch next item. Mark it as watched or skipped first.");
                 return;
             }
 
-            var unwatchedItemCount = await _watchlistReader.GetUnwatchedItemCount(validationContext.ValidationTarget.UserId);
+            var unwatchedItemCount = await _watchlistItemReader.GetUnwatchedItemCount(validationContext.ValidationTarget.UserId);
             if (unwatchedItemCount == 0)
             {
                 validationContext.ValidationMessages.Add("state", "You have no more unwatched items. Cannot select a new watch next item.");
