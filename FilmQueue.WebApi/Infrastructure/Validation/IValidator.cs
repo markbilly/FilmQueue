@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace FilmQueue.WebApi.Infrastructure.Validation
 {
-    public interface IValidator<TModel> where TModel : class
+    public interface IValidator<TModel> : IDependency where TModel : class
     {
         Task Validate(ValidationContext<TModel> validationContext);
     }

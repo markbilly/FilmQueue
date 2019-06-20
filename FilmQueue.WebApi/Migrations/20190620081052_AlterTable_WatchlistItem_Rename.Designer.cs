@@ -4,14 +4,16 @@ using FilmQueue.WebApi.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace FilmQueue.WebApi.Migrations
 {
     [DbContext(typeof(FilmQueueDbContext))]
-    partial class FilmQueueDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190620081052_AlterTable_WatchlistItem_Rename")]
+    partial class AlterTable_WatchlistItem_Rename
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

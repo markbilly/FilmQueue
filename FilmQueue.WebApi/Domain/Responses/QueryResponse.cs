@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace FilmQueue.WebApi.Domain
+namespace FilmQueue.WebApi.Domain.Responses
 {
     public class QueryResponse<TResponseItem>
     {

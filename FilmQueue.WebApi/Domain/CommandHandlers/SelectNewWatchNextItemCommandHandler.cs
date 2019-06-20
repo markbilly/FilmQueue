@@ -36,7 +36,6 @@ namespace FilmQueue.WebApi.Domain.CommandHandlers
         public async Task Execute(SelectNewWatchNextItemCommand command)
         {
             var validationContext = new ValidationContext<SelectNewWatchNextItemCommand>(command);
-
             await _validationService.Validate(validationContext);
 
             if (!validationContext.IsValid)

@@ -13,7 +13,7 @@ namespace FilmQueue.WebApi.Infrastructure.Validation
         }
 
         public TModel ValidationTarget { get; set; }
-        public IDictionary<string, string> ValidationMessages { get; set; }
+        public IDictionary<string, string> ValidationMessages { get; set; } = new Dictionary<string, string>();
 
         public bool IsValid => !ValidationMessages.Any();
     }

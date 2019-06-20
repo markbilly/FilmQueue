@@ -10,6 +10,6 @@ namespace FilmQueue.WebApi.Domain.Events
     {
         public bool NoWatchNextItemFound { get; set; }
         public long? ItemId { get; set; }
-        public Dictionary<string, string> ValidationMessages { get; set; } = new Dictionary<string, string>();
+        public IDictionary<string, string> ValidationMessages { get; set; } = new Dictionary<string, string>();
     }
 }

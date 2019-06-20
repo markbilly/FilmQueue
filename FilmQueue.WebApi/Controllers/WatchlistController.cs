@@ -6,6 +6,8 @@ using FilmQueue.WebApi.DataAccess;
 using FilmQueue.WebApi.Domain;
 using FilmQueue.WebApi.Domain.Commands;
 using FilmQueue.WebApi.Domain.Events;
+using FilmQueue.WebApi.Domain.Requests;
+using FilmQueue.WebApi.Domain.Responses;
 using FilmQueue.WebApi.Infrastructure;
 using FilmQueue.WebApi.Infrastructure.Events;
 using Microsoft.AspNetCore.Authorization;

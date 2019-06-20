@@ -5,11 +5,6 @@ using System.Threading.Tasks;
 
 namespace FilmQueue.WebApi.Domain
 {
-    public class Watchlist
-    {
-        public IEnumerable<WatchlistItem> Items { get; set; }
-    }
-
     public class WatchlistItem
     {
         public WatchlistItem(string title, int runtimeInMinutes)

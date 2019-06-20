@@ -10,5 +10,7 @@ namespace FilmQueue.WebApi.Domain.Commands
     {
         public string UserId { get; set; }
         public bool IsWatchedValue { get; set; }
+
+        public DataAccess.Models.WatchlistItemRecord WatchNextItemRecord { get; set; }
     }
 }

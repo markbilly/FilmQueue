@@ -25,7 +25,7 @@ namespace FilmQueue.WebApi.Infrastructure.Validation
         public async Task Validate<TModel>(ValidationContext<TModel> validationContext) where TModel : class
         {
             var modelType = typeof(TModel);
-            var ruleType = typeof(IValidationRule<>).MakeGenericType(modelType);
+            var ruleType = typeof(IValidator<>).MakeGenericType(modelType);
 
             if (!_validationRulesByModelType.TryGetValue(modelType, out IEnumerable<object> rules))
             {

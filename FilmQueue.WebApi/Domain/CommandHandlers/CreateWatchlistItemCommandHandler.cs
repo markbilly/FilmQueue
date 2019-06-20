@@ -33,7 +33,6 @@ namespace FilmQueue.WebApi.Domain.CommandHandlers
         public async Task Execute(CreateWatchlistItemCommand command)
         {
             var validationContext = new ValidationContext<CreateWatchlistItemCommand>(command);
-
             await _validationService.Validate(validationContext);
 
             if (!validationContext.IsValid)
