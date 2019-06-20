@@ -19,7 +19,7 @@ namespace FilmQueue.WebApi.Domain.Validators
 
         public async Task Validate(ValidationContext<UpdateWatchlistItemCommand> validationContext)
         {
-            var item = await _watchlistItemReader.GetItemById(validationContext.ValidationTarget.ItemId);
+            var item = await _watchlistItemReader.GetById(validationContext.ValidationTarget.ItemId);
             if (item == null)
             {
                 validationContext.ValidationMessages.Add("notfound", "Watchlist item does not exist.");

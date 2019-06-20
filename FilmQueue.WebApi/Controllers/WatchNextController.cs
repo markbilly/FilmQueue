@@ -46,15 +46,7 @@ namespace FilmQueue.WebApi.Controllers
                 return NotFound();
             }
 
-            var item = new WatchlistItem
-            {
-                Id = record.Id,
-                Title = record.Title,
-                RuntimeInMinutes = record.RuntimeInMinutes,
-                Watched = record.WatchedDateTime.HasValue
-            };
-
-            return Ok(new WatchlistItemResponse(item));
+            return Ok(WatchlistItemResponse.FromRecord(record));
         }
 
         [HttpPost("newwatchnextrequests")]

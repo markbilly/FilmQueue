@@ -11,7 +11,7 @@ namespace FilmQueue.WebApi.DataAccess
     public interface IWatchlistItemReader : IDependency
     {
         Task<IEnumerable<WatchlistItemRecord>> GetItemsByUserId(string userId, int take = 5, int skip = 0);
-        Task<WatchlistItemRecord> GetItemById(long id);
+        Task<WatchlistItemRecord> GetById(long id);
         Task<WatchlistItemRecord> GetRandomUnwatchedItem(string userId);
         Task<WatchlistItemRecord> GetCurrentWatchNextItem(string userId);
         Task<int> GetUnwatchedItemCount(string userId);
@@ -33,7 +33,7 @@ namespace FilmQueue.WebApi.DataAccess
                 .SingleOrDefaultAsync();
         }
 
-        public Task<WatchlistItemRecord> GetItemById(long id)
+        public Task<WatchlistItemRecord> GetById(long id)
         {
             return _dbContext.WatchlistItemRecords.FirstOrDefaultAsync(item => item.Id == id);
         }

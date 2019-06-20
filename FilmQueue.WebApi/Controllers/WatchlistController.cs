@@ -41,15 +41,7 @@ namespace FilmQueue.WebApi.Controllers
         {
             var records = await _watchlistItemReader.GetItemsByUserId(_currentUserAccessor.CurrentUser.Id, pageSize, (page - 1) * pageSize);
 
-            var items = records.Select(record => new WatchlistItem
-            {
-                Id = record.Id,
-                Title = record.Title,
-                RuntimeInMinutes = record.RuntimeInMinutes,
-                Watched = record.WatchedDateTime.HasValue
-            });
-
-            return Ok(QueryResponse<WatchlistItemResponse>.FromEnumerable(items, item => new WatchlistItemResponse(item)));
+            return Ok(QueryResponse<WatchlistItemResponse>.FromEnumerable(records, record => WatchlistItemResponse.FromRecord(record)));
         }
     }
 }

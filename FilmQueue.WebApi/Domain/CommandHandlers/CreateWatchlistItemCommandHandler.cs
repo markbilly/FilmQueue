@@ -54,13 +54,7 @@ namespace FilmQueue.WebApi.Domain.CommandHandlers
             await _eventService.RaiseEvent(new WatchlistItemCreatedEvent
             {
                 ItemId = record.Id,
-                Item = new WatchlistItem
-                {
-                    Id = record.Id,
-                    Title = record.Title,
-                    RuntimeInMinutes = record.RuntimeInMinutes,
-                    Watched = record.WatchedDateTime.HasValue
-                }
+                Item = WatchlistItem.FromRecord(record)
             });
         }
     }

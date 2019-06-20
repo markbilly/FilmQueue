@@ -47,25 +47,19 @@ namespace FilmQueue.WebApi.Domain.CommandHandlers
                 return;
             }
 
-            var item = await _watchlistItemReader.GetItemById(command.ItemId);
+            var record = await _watchlistItemReader.GetById(command.ItemId);
 
             _unitOfWork.Execute(() =>
             {
-                item.Title = command.Title;
-                item.RuntimeInMinutes = command.RuntimeInMinutes;
+                record.Title = command.Title;
+                record.RuntimeInMinutes = command.RuntimeInMinutes;
 
                 // TODO: Audit the changes
             });
 
             await _eventService.RaiseEvent(new WatchlistItemUpdatedEvent
             {
-                Item = new WatchlistItem
-                {
-                    Id = item.Id,
-                    Title = item.Title,
-                    RuntimeInMinutes = item.RuntimeInMinutes,
-                    Watched = item.WatchedDateTime.HasValue
-                }
+                Item = WatchlistItem.FromRecord(record)
             });
         }
     }

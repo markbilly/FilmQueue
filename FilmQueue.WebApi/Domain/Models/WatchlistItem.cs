@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FilmQueue.WebApi.DataAccess.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,5 +12,16 @@ namespace FilmQueue.WebApi.Domain.Models
         public string Title { get; set; }
         public int RuntimeInMinutes { get; set; }
         public bool Watched { get; set; }
+
+        public static WatchlistItem FromRecord(WatchlistItemRecord record)
+        {
+            return new WatchlistItem
+            {
+                Id = record.Id,
+                Title = record.Title,
+                RuntimeInMinutes = record.RuntimeInMinutes,
+                Watched = record.WatchedDateTime.HasValue
+            };
+        }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using FilmQueue.WebApi.DataAccess;
-using FilmQueue.WebApi.Domain;
 using FilmQueue.WebApi.Domain.Commands;
 using FilmQueue.WebApi.Domain.Events;
 using FilmQueue.WebApi.Domain.Models;
@@ -39,17 +38,9 @@ namespace FilmQueue.WebApi.Controllers
         [ProducesResponseType(typeof(WatchlistItemResponse), 200)]
         public async Task<IActionResult> GetWatchlistItem([FromRoute] long id)
         {
-            var record = await _watchlistItemReader.GetItemById(id);
+            var record = await _watchlistItemReader.GetById(id);
 
-            var item = new WatchlistItem
-            {
-                Id = record.Id,
-                Title = record.Title,
-                RuntimeInMinutes = record.RuntimeInMinutes,
-                Watched = record.WatchedDateTime.HasValue
-            };
-
-            return Ok(new WatchlistItemResponse(item));
+            return Ok(WatchlistItemResponse.FromRecord(record));
         }
 
         [HttpPut("{id}")]
@@ -88,7 +79,7 @@ namespace FilmQueue.WebApi.Controllers
                 return BadRequest(validationMessages);
             }
 
-            return Ok(new WatchlistItemResponse(item));
+            return Ok(WatchlistItemResponse.FromDomainModel(item));
         }
 
         [HttpPost]
@@ -122,7 +113,7 @@ namespace FilmQueue.WebApi.Controllers
                 return BadRequest(validationMessages);
             }
 
-            return CreatedAtAction(nameof(GetWatchlistItem), new { id = itemId }, new WatchlistItemResponse(item));
+            return CreatedAtAction(nameof(GetWatchlistItem), new { id = itemId }, WatchlistItemResponse.FromDomainModel(item));
         }
     }
 }

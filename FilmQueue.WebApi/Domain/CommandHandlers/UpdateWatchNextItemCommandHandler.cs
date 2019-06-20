@@ -50,25 +50,19 @@ namespace FilmQueue.WebApi.Domain.CommandHandlers
                 return;
             }
 
-            var current = await _watchlistItemReader.GetCurrentWatchNextItem(command.UserId);
+            var currentRecord = await _watchlistItemReader.GetCurrentWatchNextItem(command.UserId);
 
             _unitOfWork.Execute(() =>
             {
-                _watchlistItemWriter.SetWatchedDateToNow(current.Id);
-                _watchlistItemWriter.SetWatchNextEndDateToNow(current.Id);
+                _watchlistItemWriter.SetWatchedDateToNow(currentRecord.Id);
+                _watchlistItemWriter.SetWatchNextEndDateToNow(currentRecord.Id);
 
                 // TODO: Audit the changes
             });
 
             await _eventService.RaiseEvent(new WatchNextItemUpdatedEvent
             {
-                Item = new WatchlistItem
-                {
-                    Id = current.Id,
-                    Title = current.Title,
-                    RuntimeInMinutes = current.RuntimeInMinutes,
-                    Watched = current.WatchedDateTime.HasValue
-                }
+                Item = WatchlistItem.FromRecord(currentRecord)
             });
         }
     }
