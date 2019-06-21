@@ -7,6 +7,7 @@ using Autofac.Extensions.DependencyInjection;
 using FilmQueue.WebApi.DataAccess;
 using FilmQueue.WebApi.Infrastructure;
 using FilmQueue.WebApi.Infrastructure.Swagger;
+using FluentValidation.AspNetCore;
 using IdentityServer4.AccessTokenValidation;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -45,6 +46,10 @@ namespace FilmQueue.WebApi
                 {
                     options.SerializerSettings.Converters.Add(new StringEnumConverter());
                     options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                })
+                .AddFluentValidation(options =>
+                {
+                    options.RegisterValidatorsFromAssemblyContaining<Startup>();
                 });
 
             services.AddAuthentication(IdentityServerAuthenticationDefaults.AuthenticationScheme)

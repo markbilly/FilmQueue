@@ -1,5 +1,6 @@
 ﻿using FilmQueue.WebApi.Domain.Commands;
 using FilmQueue.WebApi.Infrastructure.Validation;
+using FluentValidation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,29 +8,18 @@ using System.Threading.Tasks;
 
 namespace FilmQueue.WebApi.Domain.Validators
 {
-    public class CreateWatchlistItemCommandValidator : IValidator<CreateWatchlistItemCommand>
+    public class CreateWatchlistItemCommandValidator : AbstractValidator<CreateWatchlistItemCommand>
     {
-        public Task Validate(ValidationContext<CreateWatchlistItemCommand> validationContext)
+        public CreateWatchlistItemCommandValidator()
         {
-            // TODO: check that the user exists
+            RuleFor(x => x.Title).NotEmpty()
+                .WithMessage("Title is a required field.");
 
-            if (string.IsNullOrWhiteSpace(validationContext.ValidationTarget.Title))
-            {
-                validationContext.ValidationMessages.Add("title", "Title is a required field");
-                return Task.CompletedTask;
-            }
+            RuleFor(x => x.Title).MaximumLength(200)
+                .WithMessage("Title cannot be longer than 200 characters");
 
-            if (validationContext.ValidationTarget.Title.Length > 200)
-            {
-                validationContext.ValidationMessages.Add("title", "Title cannot be longer than 200 characters.");
-            }
-
-            if (validationContext.ValidationTarget.RuntimeInMinutes <= 0)
-            {
-                validationContext.ValidationMessages.Add("title", "Runtime is not valid. Must be positive whole number.");
-            }
-
-            return Task.CompletedTask;
+            RuleFor(x => x.RuntimeInMinutes).GreaterThan(0)
+                .WithMessage("Runtime is not valid. Must be positive whole number.");
         }
     }
 }

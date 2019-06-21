@@ -2,6 +2,7 @@
 using FilmQueue.WebApi.Domain.Commands;
 using FilmQueue.WebApi.Domain.Events;
 using FilmQueue.WebApi.Domain.Models;
+using FilmQueue.WebApi.Domain.Validators;
 using FilmQueue.WebApi.Infrastructure;
 using FilmQueue.WebApi.Infrastructure.Events;
 using FilmQueue.WebApi.Infrastructure.Validation;
@@ -33,16 +34,11 @@ namespace FilmQueue.WebApi.Domain.CommandHandlers
 
         public async Task Execute(CreateWatchlistItemCommand command)
         {
-            var validationContext = new ValidationContext<CreateWatchlistItemCommand>(command);
-            await _validationService.Validate(validationContext);
-
-            if (!validationContext.IsValid)
+            var validationResult = await _validationService.Validate(command);
+            
+            if (!validationResult.IsValid)
             {
-                await _eventService.RaiseEvent(new WatchlistItemCreationFailedEvent
-                {
-                    ValidationMessages = validationContext.ValidationMessages
-                });
-
+                await _eventService.RaiseEvent(new ValidationFailedEvent<CreateWatchlistItemCommand>(validationResult));
                 return;
             }
 

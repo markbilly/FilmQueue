@@ -22,9 +22,9 @@ namespace FilmQueue.WebApi.Infrastructure.Events
             _container = container;
         }
 
-        public async Task QueueCommand<T>(T command) where T : class, ICommand
+        public async Task QueueCommand<TCommand>(TCommand command) where TCommand : class, ICommand
         {
-            var commandType = typeof(T);
+            var commandType = typeof(TCommand);
             var handlerType = typeof(ICommandHandler<>).MakeGenericType(commandType);
 
             if (!_commandHandlersByCommandType.TryGetValue(commandType, out IEnumerable<object> handlers))
@@ -40,12 +40,12 @@ namespace FilmQueue.WebApi.Infrastructure.Events
             }
         }
 
-        public Task RaiseEvent<T>(T eventToRaise) where T : class, IEvent
+        public Task RaiseEvent<TEvent>(TEvent eventToRaise) where TEvent : class, IEvent
         {
             IList<IEventSubscription> subscriptions;
             lock (_lock)
             {
-                if (!_subscriptionsByEventType.TryGetValue(typeof(T), out subscriptions))
+                if (!_subscriptionsByEventType.TryGetValue(typeof(TEvent), out subscriptions))
                 {
                     return Task.CompletedTask;
                 }
@@ -59,9 +59,9 @@ namespace FilmQueue.WebApi.Infrastructure.Events
             return Task.CompletedTask;
         }
 
-        public Task Subscribe<T>(Action<T> eventHandler) where T : class, IEvent
+        public Task Subscribe<TEvent>(Action<TEvent> eventHandler) where TEvent : class, IEvent
         {
-            var eventType = typeof(T);
+            var eventType = typeof(TEvent);
 
             lock (_lock)
             {
@@ -70,7 +70,7 @@ namespace FilmQueue.WebApi.Infrastructure.Events
                     _subscriptionsByEventType.Add(eventType, new List<IEventSubscription>());
                 }
 
-                _subscriptionsByEventType[eventType].Add(new EventSubscription<T>(eventHandler));
+                _subscriptionsByEventType[eventType].Add(new EventSubscription<TEvent>(eventHandler));
             }
 
             return Task.CompletedTask;

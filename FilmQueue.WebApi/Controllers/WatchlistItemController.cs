@@ -6,12 +6,15 @@ using FilmQueue.WebApi.Domain.Requests;
 using FilmQueue.WebApi.Domain.Responses;
 using FilmQueue.WebApi.Infrastructure;
 using FilmQueue.WebApi.Infrastructure.Events;
+using FilmQueue.WebApi.Infrastructure.Validation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 
 namespace FilmQueue.WebApi.Controllers
 {
@@ -88,7 +91,6 @@ namespace FilmQueue.WebApi.Controllers
         {
             long itemId = 0;
             WatchlistItem item = null;
-            IDictionary<string, string> validationMessages = null;
 
             await _eventService.Subscribe<WatchlistItemCreatedEvent>((createdEvent) =>
             {
@@ -96,9 +98,9 @@ namespace FilmQueue.WebApi.Controllers
                 item = createdEvent.Item;
             });
 
-            await _eventService.Subscribe<WatchlistItemCreationFailedEvent>((createFailedEvent) =>
+            await _eventService.Subscribe<ValidationFailedEvent<CreateWatchlistItemCommand>>((failedEvent) =>
             {
-                validationMessages = createFailedEvent.ValidationMessages;
+                failedEvent.ValidationResult.AddToModelState(ModelState, null);
             });
 
             await _eventService.QueueCommand(new CreateWatchlistItemCommand
@@ -108,9 +110,9 @@ namespace FilmQueue.WebApi.Controllers
                 UserId = _currentUserAccessor.CurrentUser.Id
             });
 
-            if (validationMessages != null)
+            if (!ModelState.IsValid)
             {
-                return BadRequest(validationMessages);
+                return BadRequest(ModelState);
             }
 
             return CreatedAtAction(nameof(GetWatchlistItem), new { id = itemId }, WatchlistItemResponse.FromDomainModel(item));
