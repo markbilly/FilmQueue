@@ -37,13 +37,13 @@ namespace FilmQueue.WebApi.Domain.CommandHandlers
             _unitOfWork = unitOfWork;
         }
 
-        public async Task Execute(SelectNewWatchNextItemCommand command)
+        public async Task Handle(SelectNewWatchNextItemCommand command)
         {
             var validationResult = await _validator.ValidateAsync(command);
 
             if (!validationResult.IsValid)
             {
-                await _eventService.RaiseEvent(new ValidationFailedEvent<SelectNewWatchNextItemCommand>(validationResult));
+                await _eventService.RaiseEvent(new ValidationFailedEvent(validationResult));
                 return;
             }
 

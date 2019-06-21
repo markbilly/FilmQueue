@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace FilmQueue.WebApi.Domain.Commands
 {
-    public class UpdateWatchNextItemCommand : ICommand
+    public class ExpireWatchNextItemCommand : ICommand
     {
-        public string UserId { get; set; }
-        public bool IsWatchedValue { get; set; }
+        public long ItemId { get; set; }
     }
 }

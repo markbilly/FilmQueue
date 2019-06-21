@@ -8,55 +8,67 @@ namespace FilmQueue.WebApi.Infrastructure.Events
 {
     public class ImmediateExecutionEventService : IEventService
     {
-        private readonly Dictionary<Type, IEnumerable<object>> _commandHandlersByCommandType;
-        private readonly Dictionary<Type, IList<IEventSubscription>> _subscriptionsByEventType;
+        private readonly IDictionary<Type, object> _commandHandlersByCommandType;
+        private readonly IDictionary<Type, IEnumerable<object>> _eventHandlersByEventType;
+        private readonly IDictionary<Type, IList<IEventSubscription>> _subscriptionsByEventType;
         private readonly ILifetimeScope _container;
 
-        private object _lock = new object();
+        private readonly object _lock = new object();
 
         public ImmediateExecutionEventService(
             ILifetimeScope container)
         {
-            _commandHandlersByCommandType = new Dictionary<Type, IEnumerable<object>>();
+            _commandHandlersByCommandType = new Dictionary<Type, object>();
+            _eventHandlersByEventType = new Dictionary<Type, IEnumerable<object>>();
             _subscriptionsByEventType = new Dictionary<Type, IList<IEventSubscription>>();
             _container = container;
         }
 
-        public async Task QueueCommand<TCommand>(TCommand command) where TCommand : class, ICommand
+        public async Task IssueCommand<TCommand>(TCommand command) where TCommand : class, ICommand
         {
             var commandType = typeof(TCommand);
             var handlerType = typeof(ICommandHandler<>).MakeGenericType(commandType);
 
-            if (!_commandHandlersByCommandType.TryGetValue(commandType, out IEnumerable<object> handlers))
+            if (!_commandHandlersByCommandType.TryGetValue(commandType, out object handler))
+            {
+                handler = _container.Resolve(handlerType);
+
+                _commandHandlersByCommandType.Add(commandType, handler);
+            }
+
+            await (Task)handlerType.GetMethod("Execute").Invoke(handler, new object[] { command });
+        }
+
+        public async Task RaiseEvent<TEvent>(TEvent @event) where TEvent : class, IEvent
+        {
+            var eventType = typeof(TEvent);
+            var handlerType = typeof(IEventHandler<>).MakeGenericType(eventType);
+
+            if (!_eventHandlersByEventType.TryGetValue(eventType, out IEnumerable<object> handlers))
             {
                 handlers = (IEnumerable<object>)_container.Resolve(typeof(IEnumerable<>).MakeGenericType(handlerType));
 
-                _commandHandlersByCommandType.Add(commandType, handlers);
+                _eventHandlersByEventType.Add(eventType, handlers);
             }
 
             foreach (var handler in handlers)
             {
-                await (Task)handlerType.GetMethod("Execute").Invoke(handler, new object[] { command });
+                await (Task)handlerType.GetMethod("Execute").Invoke(handler, new object[] { @event });
             }
-        }
 
-        public Task RaiseEvent<TEvent>(TEvent eventToRaise) where TEvent : class, IEvent
-        {
             IList<IEventSubscription> subscriptions;
             lock (_lock)
             {
                 if (!_subscriptionsByEventType.TryGetValue(typeof(TEvent), out subscriptions))
                 {
-                    return Task.CompletedTask;
+                    return;
                 }
             }
 
             foreach (var subscription in subscriptions)
             {
-                subscription.ExecuteEventHandler(eventToRaise);
+                subscription.ExecuteEventHandler(@event);
             }
-
-            return Task.CompletedTask;
         }
 
         public Task Subscribe<TEvent>(Action<TEvent> eventHandler) where TEvent : class, IEvent

@@ -1,7 +1,6 @@
 ﻿using FilmQueue.WebApi.DataAccess;
 using FilmQueue.WebApi.Domain.Commands;
 using FilmQueue.WebApi.Domain.Events;
-using FilmQueue.WebApi.Domain.Models;
 using FilmQueue.WebApi.Infrastructure.Events;
 using FluentValidation;
 using System;
@@ -11,44 +10,43 @@ using System.Threading.Tasks;
 
 namespace FilmQueue.WebApi.Domain.CommandHandlers
 {
-    public class CreateWatchlistItemCommandHandler : ICommandHandler<CreateWatchlistItemCommand>
+    public class UpdateWatchlistItemWatchedCommandHandler : ICommandHandler<UpdateWatchlistItemWatchedCommand>
     {
+        private readonly IValidator<UpdateWatchlistItemWatchedCommand> _validator;
         private readonly IWatchlistItemWriter _watchlistItemWriter;
-        private readonly IValidator<CreateWatchlistItemCommand> _validator;
         private readonly IEventService _eventService;
         private readonly FilmQueueDbUnitOfWork _unitOfWork;
 
-        public CreateWatchlistItemCommandHandler(
+        public UpdateWatchlistItemWatchedCommandHandler(
+            IValidator<UpdateWatchlistItemWatchedCommand> validator,
             IWatchlistItemWriter watchlistItemWriter,
-            IValidator<CreateWatchlistItemCommand> validator,
             IEventService eventService,
             FilmQueueDbUnitOfWork unitOfWork)
         {
-            _watchlistItemWriter = watchlistItemWriter;
             _validator = validator;
+            _watchlistItemWriter = watchlistItemWriter;
             _eventService = eventService;
             _unitOfWork = unitOfWork;
         }
 
-        public async Task Handle(CreateWatchlistItemCommand command)
+        public async Task Handle(UpdateWatchlistItemWatchedCommand command)
         {
             var validationResult = await _validator.ValidateAsync(command);
-            
+
             if (!validationResult.IsValid)
             {
                 await _eventService.RaiseEvent(new ValidationFailedEvent(validationResult));
                 return;
             }
 
-            var record = await _unitOfWork.Execute(async () =>
+            _unitOfWork.Execute(() =>
             {
-                return await _watchlistItemWriter.Create(command.UserId, command.Title, command.RuntimeInMinutes);
+                _watchlistItemWriter.SetWatchedDateToNow(command.ItemId);
             });
 
-            await _eventService.RaiseEvent(new WatchlistItemCreatedEvent
+            await _eventService.RaiseEvent(new WatchlistItemWatchedEvent
             {
-                ItemId = record.Id,
-                Item = WatchlistItem.FromRecord(record)
+                ItemId = command.ItemId
             });
         }
     }

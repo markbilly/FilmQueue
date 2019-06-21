@@ -18,26 +18,29 @@ namespace FilmQueue.WebApi.Domain.CommandHandlers
         private readonly IValidator<UpdateWatchlistItemCommand> _validator;
         private readonly IEventService _eventService;
         private readonly FilmQueueDbUnitOfWork _unitOfWork;
+        private readonly IClock _clock;
 
         public UpdateWatchlistItemCommandHandler(
             IWatchlistItemReader watchlistItemReader,
             IValidator<UpdateWatchlistItemCommand> validator,
             IEventService eventService,
-            FilmQueueDbUnitOfWork unitOfWork)
+            FilmQueueDbUnitOfWork unitOfWork,
+            IClock clock)
         {
             _watchlistItemReader = watchlistItemReader;
             _validator = validator;
             _eventService = eventService;
             _unitOfWork = unitOfWork;
+            _clock = clock;
         }
 
-        public async Task Execute(UpdateWatchlistItemCommand command)
+        public async Task Handle(UpdateWatchlistItemCommand command)
         {
             var validationResult = await _validator.ValidateAsync(command);
 
             if (!validationResult.IsValid)
             {
-                await _eventService.RaiseEvent(new ValidationFailedEvent<UpdateWatchlistItemCommand>(validationResult));
+                await _eventService.RaiseEvent(new ValidationFailedEvent(validationResult));
                 return;
             }
 

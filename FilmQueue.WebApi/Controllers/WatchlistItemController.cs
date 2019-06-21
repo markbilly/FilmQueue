@@ -47,41 +47,46 @@ namespace FilmQueue.WebApi.Controllers
 
         [HttpPut("{id}")]
         [ProducesResponseType(typeof(WatchlistItemResponse), 200)]
-        public async Task<IActionResult> UpdateWatchlistItem([FromRoute] long id, [FromBody] UpdateWatchlistItemRequest updateWatchlistItemRequest)
+        public async Task<IActionResult> UpdateWatchlistItem([FromRoute] long id, [FromBody] UpdateWatchlistItemRequest request)
         {
             WatchlistItem item = null;
-            bool itemNotFound = false;
-            IDictionary<string, string> validationMessages = null;
+            bool notFound = false; // TODO: Make this work again with specific failure event
 
             await _eventService.Subscribe<WatchlistItemUpdatedEvent>((updatedEvent) =>
             {
                 item = updatedEvent.Item;
             });
 
-            await _eventService.Subscribe<WatchlistItemUpdateFailedEvent>((updateFailedEvent) =>
+            await _eventService.Subscribe<ValidationFailedEvent>((failedEvent) =>
             {
-                itemNotFound = updateFailedEvent.ItemNotFound;
-                validationMessages = updateFailedEvent.ValidationMessages;
+                failedEvent.ValidationResult.AddToModelState(ModelState, null);
             });
 
-            await _eventService.QueueCommand(new UpdateWatchlistItemCommand
+            await _eventService.IssueCommand(new UpdateWatchlistItemCommand
             {
                 ItemId = id,
-                Title = updateWatchlistItemRequest.Title,
-                RuntimeInMinutes = updateWatchlistItemRequest.RuntimeInMinutes
+                Title = request.Title,
+                RuntimeInMinutes = request.RuntimeInMinutes
             });
 
-            if (itemNotFound)
+            if (notFound)
             {
                 return NotFound();
             }
 
-            if (validationMessages != null)
+            if (!ModelState.IsValid)
             {
-                return BadRequest(validationMessages);
+                return BadRequest(ModelState);
             }
 
             return Ok(WatchlistItemResponse.FromDomainModel(item));
+        }
+
+        [HttpPut]
+        [ProducesResponseType(typeof(bool), 200)]
+        public async Task<IActionResult> SetItemToWatched([FromBody] UpdateWatchlistItemWatchedRequest request)
+        {
+            return Ok();
         }
 
         [HttpPost]
@@ -97,12 +102,12 @@ namespace FilmQueue.WebApi.Controllers
                 item = createdEvent.Item;
             });
 
-            await _eventService.Subscribe<ValidationFailedEvent<CreateWatchlistItemCommand>>((failedEvent) =>
+            await _eventService.Subscribe<ValidationFailedEvent>((failedEvent) =>
             {
                 failedEvent.ValidationResult.AddToModelState(ModelState, null);
             });
 
-            await _eventService.QueueCommand(new CreateWatchlistItemCommand
+            await _eventService.IssueCommand(new CreateWatchlistItemCommand
             {
                 Title = createWatchlistItemRequest.Title,
                 RuntimeInMinutes = createWatchlistItemRequest.RuntimeInMinutes,

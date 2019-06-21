@@ -8,7 +8,7 @@ namespace FilmQueue.WebApi.Infrastructure.Events
     public interface IEventService : IDependency
     {
         Task RaiseEvent<TEvent>(TEvent eventToRaise) where TEvent : class, IEvent;
-        Task QueueCommand<TCommand>(TCommand command) where TCommand : class, ICommand;
+        Task IssueCommand<TCommand>(TCommand command) where TCommand : class, ICommand;
         Task Subscribe<TEvent>(Action<TEvent> eventHandler) where TEvent : class, IEvent;
     }
 }

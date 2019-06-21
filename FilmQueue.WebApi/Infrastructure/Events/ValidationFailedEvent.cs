@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace FilmQueue.WebApi.Infrastructure.Events
 {
-    public class ValidationFailedEvent<T> : IEvent where T : class
+    public class ValidationFailedEvent : IEvent
     {
         public ValidationFailedEvent(ValidationResult validationResult)
         {

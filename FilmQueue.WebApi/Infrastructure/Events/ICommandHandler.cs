@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace FilmQueue.WebApi.Infrastructure.Events
 {
-    public interface ICommandHandler<T> : IDependency where T : ICommand
+    public interface ICommandHandler<TCommand> : IDependency where TCommand : ICommand
     {
-        Task Execute(T command);
+        Task Handle(TCommand command);
     }
 }

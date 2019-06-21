@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FluentValidation.AspNetCore;
 
 namespace FilmQueue.WebApi.Controllers
 {
@@ -49,55 +50,50 @@ namespace FilmQueue.WebApi.Controllers
             return Ok(WatchlistItemResponse.FromRecord(record));
         }
 
-        [HttpPost("newwatchnextrequests")]
-        public async Task<IActionResult> SelectNewWatchNextItem()
+        [HttpDelete("watchlist/items/watchnext")]
+        public async Task<IActionResult> ExpireWatchNext()
         {
-            IDictionary<string, string> validationMessages = null;
+            var record = await _watchlistItemReader.GetCurrentWatchNextItem(_currentUserAccessor.CurrentUser.Id);
 
-            await _eventService.Subscribe<NewWatchNextItemSelectionFailedEvent>((e) =>
+            if (record == null)
             {
-                validationMessages = e.ValidationMessages;
+                return NotFound();
+            }
+
+            await _eventService.Subscribe<ValidationFailedEvent>((failedEvent) =>
+            {
+                failedEvent.ValidationResult.AddToModelState(ModelState, null);
             });
 
-            await _eventService.QueueCommand(new SelectNewWatchNextItemCommand
+            await _eventService.IssueCommand(new ExpireWatchNextItemCommand
             {
-                UserId = _currentUserAccessor.CurrentUser.Id
+                ItemId = record.Id
             });
 
-            if (validationMessages != null)
+            if (!ModelState.IsValid)
             {
-                return BadRequest(validationMessages);
+                return BadRequest(ModelState);
             }
 
             return NoContent();
         }
 
-        [HttpPut("watchlist/items/watchnext")]
-        public async Task<IActionResult> UpdateWatchNext([FromBody] UpdateWatchNextRequest updateWatchNextRequest)
+        [HttpPost("newwatchnextrequests")]
+        public async Task<IActionResult> SelectNewWatchNextItem()
         {
-            bool notFound = false;
-            IDictionary<string, string> validationMessages = null;
-
-            await _eventService.Subscribe<WatchNextItemUpdateFailedEvent>((e) =>
+            await _eventService.Subscribe<ValidationFailedEvent>((failedEvent) =>
             {
-                notFound = e.NoWatchNextItemFound;
-                validationMessages = e.ValidationMessages;
+                failedEvent.ValidationResult.AddToModelState(ModelState, null);
             });
 
-            await _eventService.QueueCommand(new UpdateWatchNextItemCommand
+            await _eventService.IssueCommand(new SelectNewWatchNextItemCommand
             {
-                UserId = _currentUserAccessor.CurrentUser.Id,
-                IsWatchedValue = updateWatchNextRequest.IsWatched
+                UserId = _currentUserAccessor.CurrentUser.Id
             });
 
-            if (notFound)
+            if (!ModelState.IsValid)
             {
-                return NotFound();
-            }
-
-            if (validationMessages != null)
-            {
-                return BadRequest(validationMessages);
+                return BadRequest(ModelState);
             }
 
             return NoContent();
