@@ -1,5 +1,6 @@
 ﻿using FilmQueue.WebApi.DataAccess.Models;
 using FilmQueue.WebApi.Infrastructure;
+using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -1,6 +1,7 @@
 ﻿using FilmQueue.WebApi.DataAccess.Models;
 using FilmQueue.WebApi.Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,17 +21,24 @@ namespace FilmQueue.WebApi.DataAccess
     public class WatchlistItemReader : IWatchlistItemReader
     {
         private readonly FilmQueueDbContext _dbContext;
+        private readonly IMemoryCache _memoryCache;
 
-        public WatchlistItemReader(FilmQueueDbContext dbContext)
+        public WatchlistItemReader(
+            FilmQueueDbContext dbContext,
+            IMemoryCache memoryCache)
         {
             _dbContext = dbContext;
+            _memoryCache = memoryCache;
         }
 
         public async Task<WatchlistItemRecord> GetCurrentWatchNextItem(string userId)
         {
-            return await _dbContext.WatchlistItemRecords
-                .Where(item => item.CreatedByUserId == userId && item.WatchNextStart.HasValue && !item.WatchNextEnd.HasValue)
-                .SingleOrDefaultAsync();
+            return await _memoryCache.GetOrCreateAsync(CacheKeys.WatchNext(userId), entry =>
+            {
+                return _dbContext.WatchlistItemRecords
+                    .Where(item => item.CreatedByUserId == userId && item.WatchNextStart.HasValue && !item.WatchNextEnd.HasValue)
+                    .SingleOrDefaultAsync();
+            });
         }
 
         public Task<WatchlistItemRecord> GetById(long id)

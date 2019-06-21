@@ -40,6 +40,8 @@ namespace FilmQueue.WebApi
 
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
+            services.AddMemoryCache();
+
             services
                 .AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
                 .AddJsonOptions(options =>
