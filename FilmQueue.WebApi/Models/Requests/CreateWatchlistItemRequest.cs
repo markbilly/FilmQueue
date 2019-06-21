@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace FilmQueue.WebApi.Domain.Requests
+namespace FilmQueue.WebApi.Models.Requests
 {
-    public class UpdateWatchlistItemRequest
+    public class CreateToWatchlistItemRequest
     {
         public string Title { get; set; }
         public int RuntimeInMinutes { get; set; }

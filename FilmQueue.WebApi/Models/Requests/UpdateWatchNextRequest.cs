@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace FilmQueue.WebApi.Domain.Requests
+namespace FilmQueue.WebApi.Models.Requests
 {
     public class UpdateWatchNextRequest
     {
