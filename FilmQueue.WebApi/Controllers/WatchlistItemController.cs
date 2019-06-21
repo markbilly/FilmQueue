@@ -6,7 +6,6 @@ using FilmQueue.WebApi.Domain.Requests;
 using FilmQueue.WebApi.Domain.Responses;
 using FilmQueue.WebApi.Infrastructure;
 using FilmQueue.WebApi.Infrastructure.Events;
-using FilmQueue.WebApi.Infrastructure.Validation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;

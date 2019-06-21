@@ -3,7 +3,7 @@ using FilmQueue.WebApi.Domain.Commands;
 using FilmQueue.WebApi.Domain.Events;
 using FilmQueue.WebApi.Infrastructure;
 using FilmQueue.WebApi.Infrastructure.Events;
-using FilmQueue.WebApi.Infrastructure.Validation;
+using FluentValidation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,36 +15,31 @@ namespace FilmQueue.WebApi.Domain.CommandHandlers
     {
         private readonly IWatchlistItemWriter _watchlistItemWriter;
         private readonly IWatchlistItemReader _watchlistItemReader;
-        private readonly IValidationService _validationService;
+        private readonly IValidator<SelectNewWatchNextItemCommand> _validator;
         private readonly IEventService _eventService;
         private readonly FilmQueueDbUnitOfWork _unitOfWork;
 
         public SelectNewWatchNextItemCommandHandler(
             IWatchlistItemWriter watchlistItemWriter,
             IWatchlistItemReader watchlistItemReader,
-            IValidationService validationService,
+            IValidator<SelectNewWatchNextItemCommand> validator,
             IEventService eventService,
             FilmQueueDbUnitOfWork unitOfWork)
         {
             _watchlistItemWriter = watchlistItemWriter;
             _watchlistItemReader = watchlistItemReader;
-            _validationService = validationService;
+            _validator = validator;
             _eventService = eventService;
             _unitOfWork = unitOfWork;
         }
 
         public async Task Execute(SelectNewWatchNextItemCommand command)
         {
-            var validationContext = new ValidationContext<SelectNewWatchNextItemCommand>(command);
-            await _validationService.Validate(validationContext);
+            var validationResult = await _validator.ValidateAsync(command);
 
-            if (!validationContext.IsValid)
+            if (!validationResult.IsValid)
             {
-                await _eventService.RaiseEvent(new NewWatchNextItemSelectionFailedEvent
-                {
-                    ValidationMessages = validationContext.ValidationMessages
-                });
-
+                await _eventService.RaiseEvent(new ValidationFailedEvent<SelectNewWatchNextItemCommand>(validationResult));
                 return;
             }
 

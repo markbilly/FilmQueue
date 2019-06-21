@@ -2,10 +2,8 @@
 using FilmQueue.WebApi.Domain.Commands;
 using FilmQueue.WebApi.Domain.Events;
 using FilmQueue.WebApi.Domain.Models;
-using FilmQueue.WebApi.Domain.Validators;
-using FilmQueue.WebApi.Infrastructure;
 using FilmQueue.WebApi.Infrastructure.Events;
-using FilmQueue.WebApi.Infrastructure.Validation;
+using FluentValidation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,25 +14,25 @@ namespace FilmQueue.WebApi.Domain.CommandHandlers
     public class CreateWatchlistItemCommandHandler : ICommandHandler<CreateWatchlistItemCommand>
     {
         private readonly IWatchlistItemWriter _watchlistItemWriter;
-        private readonly IValidationService _validationService;
+        private readonly IValidator<CreateWatchlistItemCommand> _validator;
         private readonly IEventService _eventService;
         private readonly FilmQueueDbUnitOfWork _unitOfWork;
 
         public CreateWatchlistItemCommandHandler(
             IWatchlistItemWriter watchlistItemWriter,
-            IValidationService validationService,
+            IValidator<CreateWatchlistItemCommand> validator,
             IEventService eventService,
             FilmQueueDbUnitOfWork unitOfWork)
         {
             _watchlistItemWriter = watchlistItemWriter;
-            _validationService = validationService;
+            _validator = validator;
             _eventService = eventService;
             _unitOfWork = unitOfWork;
         }
 
         public async Task Execute(CreateWatchlistItemCommand command)
         {
-            var validationResult = await _validationService.Validate(command);
+            var validationResult = await _validator.ValidateAsync(command);
             
             if (!validationResult.IsValid)
             {

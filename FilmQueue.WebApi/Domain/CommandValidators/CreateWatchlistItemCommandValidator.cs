@@ -1,12 +1,11 @@
 ﻿using FilmQueue.WebApi.Domain.Commands;
-using FilmQueue.WebApi.Infrastructure.Validation;
 using FluentValidation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace FilmQueue.WebApi.Domain.Validators
+namespace FilmQueue.WebApi.Domain.CommandValidators
 {
     public class CreateWatchlistItemCommandValidator : AbstractValidator<CreateWatchlistItemCommand>
     {

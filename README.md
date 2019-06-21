@@ -1,5 +1,8 @@
 # Film Queue
 
-Make a note of all the films you want to watch.
+Fairly contrived watchlist app to explore some frameworks and patterns I am interested in
 
-This app can give you a random one to watch each day.
+CQRS pattern
+EF code first
+FluentValidation
+Vue CLI (at some point in future)

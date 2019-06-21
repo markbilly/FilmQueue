@@ -4,7 +4,7 @@ using FilmQueue.WebApi.Domain.Events;
 using FilmQueue.WebApi.Domain.Models;
 using FilmQueue.WebApi.Infrastructure;
 using FilmQueue.WebApi.Infrastructure.Events;
-using FilmQueue.WebApi.Infrastructure.Validation;
+using FluentValidation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,35 +15,29 @@ namespace FilmQueue.WebApi.Domain.CommandHandlers
     public class UpdateWatchlistItemCommandHandler : ICommandHandler<UpdateWatchlistItemCommand>
     {
         private readonly IWatchlistItemReader _watchlistItemReader;
-        private readonly IValidationService _validationService;
+        private readonly IValidator<UpdateWatchlistItemCommand> _validator;
         private readonly IEventService _eventService;
         private readonly FilmQueueDbUnitOfWork _unitOfWork;
 
         public UpdateWatchlistItemCommandHandler(
             IWatchlistItemReader watchlistItemReader,
-            IValidationService validationService,
+            IValidator<UpdateWatchlistItemCommand> validator,
             IEventService eventService,
             FilmQueueDbUnitOfWork unitOfWork)
         {
             _watchlistItemReader = watchlistItemReader;
-            _validationService = validationService;
+            _validator = validator;
             _eventService = eventService;
             _unitOfWork = unitOfWork;
         }
 
         public async Task Execute(UpdateWatchlistItemCommand command)
         {
-            var validationContext = new ValidationContext<UpdateWatchlistItemCommand>(command);
-            await _validationService.Validate(validationContext);
+            var validationResult = await _validator.ValidateAsync(command);
 
-            if (!validationContext.IsValid)
+            if (!validationResult.IsValid)
             {
-                await _eventService.RaiseEvent(new WatchlistItemUpdateFailedEvent
-                {
-                    ItemNotFound = validationContext.ValidationMessages.ContainsKey("notfound"),
-                    ValidationMessages = validationContext.ValidationMessages
-                });
-
+                await _eventService.RaiseEvent(new ValidationFailedEvent<UpdateWatchlistItemCommand>(validationResult));
                 return;
             }
 

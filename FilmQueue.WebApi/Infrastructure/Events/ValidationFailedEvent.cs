@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace FilmQueue.WebApi.Infrastructure.Validation
+namespace FilmQueue.WebApi.Infrastructure.Events
 {
     public class ValidationFailedEvent<T> : IEvent where T : class
     {
