@@ -1,6 +1,7 @@
 ﻿using FilmQueue.WebApi.DataAccess;
 using FilmQueue.WebApi.Domain.Commands;
 using FluentValidation;
+using FilmQueue.WebApi.Infrastructure.FluentValidation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +19,7 @@ namespace FilmQueue.WebApi.Domain.CommandValidators
             _watchlistItemReader = watchlistItemReader;
 
             RuleFor(x => x.ItemId).MustAsync(WatchlistItemExists)
-                .WithMessage("Watchlist item must exist");
+                .ResourceNotFoundRule();
 
             RuleFor(x => x.ItemId).MustAsync(IsActiveWatchNext)
                 .WithMessage("Item is not an active watch next.");

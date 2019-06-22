@@ -14,6 +14,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using FilmQueue.WebApi.Infrastructure.FluentValidation;
 
 namespace FilmQueue.WebApi.Controllers
 {
@@ -50,11 +51,16 @@ namespace FilmQueue.WebApi.Controllers
         public async Task<IActionResult> UpdateWatchlistItem([FromRoute] long id, [FromBody] UpdateWatchlistItemRequest request)
         {
             WatchlistItem item = null;
-            bool notFound = false; // TODO: Make this work again with specific failure event
+            bool notFound = false;
 
             await _eventService.Subscribe<WatchlistItemUpdatedEvent>((updatedEvent) =>
             {
                 item = updatedEvent.Item;
+            });
+
+            await _eventService.Subscribe<ResourceNotFoundEvent>((notFoundEvent) =>
+            {
+                notFound = true;
             });
 
             await _eventService.Subscribe<ValidationFailedEvent>((failedEvent) =>
@@ -82,11 +88,39 @@ namespace FilmQueue.WebApi.Controllers
             return Ok(WatchlistItemResponse.FromDomainModel(item));
         }
 
-        [HttpPut]
+        [HttpPut("{id}/watched")]
         [ProducesResponseType(typeof(bool), 200)]
         public async Task<IActionResult> SetItemToWatched([FromBody] UpdateWatchlistItemWatchedRequest request)
         {
-            return Ok();
+            bool notFound = false;
+            
+            await _eventService.Subscribe<ResourceNotFoundEvent>((notFoundEvent) =>
+            {
+                notFound = true;
+            });
+
+            await _eventService.Subscribe<ValidationFailedEvent>((failedEvent) =>
+            {
+                failedEvent.ValidationResult.AddToModelState(ModelState, null);
+            });
+
+            await _eventService.IssueCommand(new UpdateWatchlistItemWatchedCommand
+            {
+                ItemId = request.ItemId,
+                Watched = request.Watched
+            });
+
+            if (notFound)
+            {
+                return NotFound();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            return Ok(request.Watched);
         }
 
         [HttpPost]

@@ -1,5 +1,6 @@
 ﻿using FilmQueue.WebApi.DataAccess;
 using FilmQueue.WebApi.Domain.Commands;
+using FilmQueue.WebApi.Infrastructure.FluentValidation;
 using FluentValidation;
 using System;
 using System.Collections.Generic;
@@ -18,7 +19,7 @@ namespace FilmQueue.WebApi.Domain.CommandValidators
             _watchlistItemReader = watchlistItemReader;
 
             RuleFor(x => x.ItemId).MustAsync(WatchlistItemExists)
-                .WithMessage("Watchlist item must exist.");
+                .ResourceNotFoundRule();
 
             RuleFor(x => x.Watched).Must(x => x == true)
                 .WithMessage("You cannot unwatch an item.");

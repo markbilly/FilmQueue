@@ -3,6 +3,7 @@ using FilmQueue.WebApi.Domain.Commands;
 using FilmQueue.WebApi.Domain.Events;
 using FilmQueue.WebApi.Infrastructure;
 using FilmQueue.WebApi.Infrastructure.Events;
+using FilmQueue.WebApi.Infrastructure.FluentValidation;
 using FluentValidation;
 using Microsoft.Extensions.Caching.Memory;
 using System;
@@ -40,6 +41,12 @@ namespace FilmQueue.WebApi.Domain.CommandHandlers
         public async Task Handle(SelectNewWatchNextItemCommand command)
         {
             var validationResult = await _validator.ValidateAsync(command);
+
+            if (validationResult.IsResourceNotFoundResult())
+            {
+                await _eventService.RaiseEvent(new ResourceNotFoundEvent());
+                return;
+            }
 
             if (!validationResult.IsValid)
             {

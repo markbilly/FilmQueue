@@ -7,6 +7,11 @@ namespace FilmQueue.WebApi.Infrastructure.Events
 {
     public class ResourceNotFoundEvent : IEvent
     {
+        public ResourceNotFoundEvent()
+        {
+
+        }
+
         public ResourceNotFoundEvent(long resourceId)
         {
             ResourceId = resourceId;

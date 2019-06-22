@@ -4,6 +4,7 @@ using FilmQueue.WebApi.Domain.Events;
 using FilmQueue.WebApi.Domain.Models;
 using FilmQueue.WebApi.Infrastructure;
 using FilmQueue.WebApi.Infrastructure.Events;
+using FilmQueue.WebApi.Infrastructure.FluentValidation;
 using FluentValidation;
 using System;
 using System.Collections.Generic;
@@ -18,25 +19,28 @@ namespace FilmQueue.WebApi.Domain.CommandHandlers
         private readonly IValidator<UpdateWatchlistItemCommand> _validator;
         private readonly IEventService _eventService;
         private readonly FilmQueueDbUnitOfWork _unitOfWork;
-        private readonly IClock _clock;
 
         public UpdateWatchlistItemCommandHandler(
             IWatchlistItemReader watchlistItemReader,
             IValidator<UpdateWatchlistItemCommand> validator,
             IEventService eventService,
-            FilmQueueDbUnitOfWork unitOfWork,
-            IClock clock)
+            FilmQueueDbUnitOfWork unitOfWork)
         {
             _watchlistItemReader = watchlistItemReader;
             _validator = validator;
             _eventService = eventService;
             _unitOfWork = unitOfWork;
-            _clock = clock;
         }
 
         public async Task Handle(UpdateWatchlistItemCommand command)
         {
             var validationResult = await _validator.ValidateAsync(command);
+
+            if (validationResult.IsResourceNotFoundResult())
+            {
+                await _eventService.RaiseEvent(new ResourceNotFoundEvent(command.ItemId));
+                return;
+            }
 
             if (!validationResult.IsValid)
             {

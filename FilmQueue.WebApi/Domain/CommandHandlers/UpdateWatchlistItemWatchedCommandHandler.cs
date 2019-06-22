@@ -2,6 +2,7 @@
 using FilmQueue.WebApi.Domain.Commands;
 using FilmQueue.WebApi.Domain.Events;
 using FilmQueue.WebApi.Infrastructure.Events;
+using FilmQueue.WebApi.Infrastructure.FluentValidation;
 using FluentValidation;
 using System;
 using System.Collections.Generic;
@@ -32,6 +33,12 @@ namespace FilmQueue.WebApi.Domain.CommandHandlers
         public async Task Handle(UpdateWatchlistItemWatchedCommand command)
         {
             var validationResult = await _validator.ValidateAsync(command);
+
+            if (validationResult.IsResourceNotFoundResult())
+            {
+                await _eventService.RaiseEvent(new ResourceNotFoundEvent(command.ItemId));
+                return;
+            }
 
             if (!validationResult.IsValid)
             {
