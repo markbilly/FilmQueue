@@ -19,7 +19,7 @@ namespace FilmQueue.WebApi.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("api")]
+    [Route("api/watchlist/items/watchnext")]
     public class WatchNextController : ControllerBase
     {
         private readonly ICurrentUserAccessor _currentUserAccessor;
@@ -36,7 +36,7 @@ namespace FilmQueue.WebApi.Controllers
             _eventService = eventService;
         }
 
-        [HttpGet("watchlist/items/watchnext")]
+        [HttpGet]
         [ProducesResponseType(typeof(WatchlistItemResponse), 200)]
         public async Task<IActionResult> GetWatchNext()
         {
@@ -50,7 +50,7 @@ namespace FilmQueue.WebApi.Controllers
             return Ok(WatchlistItemResponse.FromRecord(record));
         }
 
-        [HttpDelete("watchlist/items/watchnext")]
+        [HttpDelete]
         public async Task<IActionResult> ExpireWatchNext()
         {
             var record = await _watchlistItemReader.GetCurrentWatchNextItem(_currentUserAccessor.CurrentUser.Id);
@@ -81,10 +81,15 @@ namespace FilmQueue.WebApi.Controllers
             return result;
         }
 
-        [HttpPost("newwatchnextrequests")]
-        public async Task<IActionResult> SelectNewWatchNextItem()
+        [HttpPut]
+        public async Task<IActionResult> SelectWatchNext([FromBody] SelectWatchNextItemRequest request)
         {
             IActionResult result = null;
+
+            await _eventService.Subscribe<ResourceNotFoundEvent>((notFoundEvent) =>
+            {
+                result = NotFound();
+            });
 
             await _eventService.Subscribe<ValidationFailedEvent>((failedEvent) =>
             {
@@ -92,14 +97,16 @@ namespace FilmQueue.WebApi.Controllers
                 result = BadRequest(ModelState);
             });
 
-            await _eventService.Subscribe<NewWatchNextItemSelectedEvent>((successEvent) =>
+            await _eventService.Subscribe<WatchNextItemSelectedEvent>((successEvent) =>
             {
                 result = NoContent();
             });
 
-            await _eventService.IssueCommand(new SelectNewWatchNextItemCommand
+            await _eventService.IssueCommand(new SelectWatchNextItemCommand
             {
-                UserId = _currentUserAccessor.CurrentUser.Id
+                UserId = _currentUserAccessor.CurrentUser.Id,
+                ItemId = request.ItemId,
+                SelectRandomItem = request.SelectRandomItem
             });
 
             return result;

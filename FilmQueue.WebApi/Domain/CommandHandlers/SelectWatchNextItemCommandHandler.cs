@@ -1,4 +1,5 @@
 ﻿using FilmQueue.WebApi.DataAccess;
+using FilmQueue.WebApi.DataAccess.Models;
 using FilmQueue.WebApi.Domain.Commands;
 using FilmQueue.WebApi.Domain.Events;
 using FilmQueue.WebApi.Infrastructure;
@@ -13,19 +14,19 @@ using System.Threading.Tasks;
 
 namespace FilmQueue.WebApi.Domain.CommandHandlers
 {
-    public class SelectNewWatchNextItemCommandHandler : ICommandHandler<SelectNewWatchNextItemCommand>
+    public class SelectWatchNextItemCommandHandler : ICommandHandler<SelectWatchNextItemCommand>
     {
         private readonly IWatchlistItemWriter _watchlistItemWriter;
         private readonly IWatchlistItemReader _watchlistItemReader;
-        private readonly IValidator<SelectNewWatchNextItemCommand> _validator;
+        private readonly IValidator<SelectWatchNextItemCommand> _validator;
         private readonly IEventService _eventService;
         private readonly IMemoryCache _memoryCache;
         private readonly FilmQueueDbUnitOfWork _unitOfWork;
 
-        public SelectNewWatchNextItemCommandHandler(
+        public SelectWatchNextItemCommandHandler(
             IWatchlistItemWriter watchlistItemWriter,
             IWatchlistItemReader watchlistItemReader,
-            IValidator<SelectNewWatchNextItemCommand> validator,
+            IValidator<SelectWatchNextItemCommand> validator,
             IEventService eventService,
             IMemoryCache memoryCache,
             FilmQueueDbUnitOfWork unitOfWork)
@@ -38,7 +39,7 @@ namespace FilmQueue.WebApi.Domain.CommandHandlers
             _unitOfWork = unitOfWork;
         }
 
-        public async Task Handle(SelectNewWatchNextItemCommand command)
+        public async Task Handle(SelectWatchNextItemCommand command)
         {
             var validationResult = await _validator.ValidateAsync(command);
 
@@ -54,19 +55,22 @@ namespace FilmQueue.WebApi.Domain.CommandHandlers
                 return;
             }
 
-            var randomUnwatchedItem = await _watchlistItemReader.GetRandomUnwatchedItem(command.UserId);
+            var record = command.ItemId.HasValue
+                ? await _watchlistItemReader.GetById(command.ItemId.Value)
+                : await _watchlistItemReader.GetRandomUnwatchedItem(command.UserId);
 
             _unitOfWork.Execute(() =>
             {
-                _watchlistItemWriter.SetWatchNextStartDateToNow(randomUnwatchedItem.Id);
+                _watchlistItemWriter.SetWatchNextStartDateToNow(record.Id);
                 // TODO: Audit change
             });
 
             _memoryCache.Remove(CacheKeys.WatchNext(command.UserId)); // TODO: Caching stuff should be in data access
 
-            await _eventService.RaiseEvent(new NewWatchNextItemSelectedEvent
+            await _eventService.RaiseEvent(new WatchNextItemSelectedEvent
             {
-                ItemId = randomUnwatchedItem.Id
+                ItemId = record.Id,
+                UserId = record.CreatedByUserId
             });
         }
     }
