@@ -50,22 +50,23 @@ namespace FilmQueue.WebApi.Controllers
         [ProducesResponseType(typeof(WatchlistItemResponse), 200)]
         public async Task<IActionResult> UpdateWatchlistItem([FromRoute] long id, [FromBody] UpdateWatchlistItemRequest request)
         {
-            WatchlistItem item = null;
-            bool notFound = false;
-
-            await _eventService.Subscribe<WatchlistItemUpdatedEvent>((updatedEvent) =>
-            {
-                item = updatedEvent.Item;
-            });
+            IActionResult result = null;
 
             await _eventService.Subscribe<ResourceNotFoundEvent>((notFoundEvent) =>
             {
-                notFound = true;
+                result = NotFound();
             });
 
             await _eventService.Subscribe<ValidationFailedEvent>((failedEvent) =>
             {
                 failedEvent.ValidationResult.AddToModelState(ModelState, null);
+                result = BadRequest(ModelState);
+            });
+
+            await _eventService.Subscribe<WatchlistItemUpdatedEvent>((updatedEvent) =>
+            {
+                var response = WatchlistItemResponse.FromDomainModel(updatedEvent.Item);
+                result = Ok(response);
             });
 
             await _eventService.IssueCommand(new UpdateWatchlistItemCommand
@@ -75,33 +76,24 @@ namespace FilmQueue.WebApi.Controllers
                 RuntimeInMinutes = request.RuntimeInMinutes
             });
 
-            if (notFound)
-            {
-                return NotFound();
-            }
-
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            return Ok(WatchlistItemResponse.FromDomainModel(item));
+            return result;
         }
 
         [HttpPut("{id}/watched")]
         [ProducesResponseType(typeof(bool), 200)]
         public async Task<IActionResult> SetItemToWatched([FromBody] UpdateWatchlistItemWatchedRequest request)
         {
-            bool notFound = false;
-            
+            IActionResult result = null;
+
             await _eventService.Subscribe<ResourceNotFoundEvent>((notFoundEvent) =>
             {
-                notFound = true;
+                result = NotFound();
             });
 
             await _eventService.Subscribe<ValidationFailedEvent>((failedEvent) =>
             {
                 failedEvent.ValidationResult.AddToModelState(ModelState, null);
+                result = BadRequest(ModelState);
             });
 
             await _eventService.IssueCommand(new UpdateWatchlistItemWatchedCommand
@@ -110,35 +102,27 @@ namespace FilmQueue.WebApi.Controllers
                 Watched = request.Watched
             });
 
-            if (notFound)
-            {
-                return NotFound();
-            }
-
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            return Ok(request.Watched);
+            return result ?? Ok(request.Watched);
         }
 
         [HttpPost]
         [ProducesResponseType(typeof(WatchlistItemResponse), 201)]
         public async Task<IActionResult> CreateWatchlistItem([FromBody] CreateToWatchlistItemRequest createWatchlistItemRequest)
         {
-            long itemId = 0;
-            WatchlistItem item = null;
-
-            await _eventService.Subscribe<WatchlistItemCreatedEvent>((createdEvent) =>
-            {
-                itemId = createdEvent.ItemId;
-                item = createdEvent.Item;
-            });
+            IActionResult result = null;
 
             await _eventService.Subscribe<ValidationFailedEvent>((failedEvent) =>
             {
                 failedEvent.ValidationResult.AddToModelState(ModelState, null);
+                result = BadRequest(ModelState);
+            });
+
+            await _eventService.Subscribe<WatchlistItemCreatedEvent>((createdEvent) =>
+            {
+                result = CreatedAtAction(
+                    nameof(GetWatchlistItem),
+                    new { id = createdEvent.ItemId },
+                    WatchlistItemResponse.FromDomainModel(createdEvent.Item));
             });
 
             await _eventService.IssueCommand(new CreateWatchlistItemCommand
@@ -148,12 +132,7 @@ namespace FilmQueue.WebApi.Controllers
                 UserId = _currentUserAccessor.CurrentUser.Id
             });
 
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            return CreatedAtAction(nameof(GetWatchlistItem), new { id = itemId }, WatchlistItemResponse.FromDomainModel(item));
+            return result;
         }
     }
 }

@@ -7,21 +7,21 @@ namespace FilmQueue.WebApi.Infrastructure.Events
 {
     public interface IEventSubscription
     {
-        void ExecuteEventHandler(IEvent eventToHandle);
+        void ExecuteEventHandler(IEvent @event);
     }
 
-    public class EventSubscription<T> : IEventSubscription where T : class, IEvent
+    public class EventSubscription<TEvent> : IEventSubscription where TEvent : class, IEvent
     {
-        private readonly Action<T> _eventHandler;
+        private readonly Action<TEvent> _eventHandler;
 
-        public EventSubscription(Action<T> eventHandler)
+        public EventSubscription(Action<TEvent> eventHandler)
         {
             _eventHandler = eventHandler;
         }
 
-        public void ExecuteEventHandler(IEvent eventToHandle)
+        public void ExecuteEventHandler(IEvent @event)
         {
-            _eventHandler.Invoke(eventToHandle as T);
+            _eventHandler.Invoke(@event as TEvent);
         }
     }
 }

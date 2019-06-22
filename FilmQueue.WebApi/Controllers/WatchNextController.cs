@@ -60,9 +60,17 @@ namespace FilmQueue.WebApi.Controllers
                 return NotFound();
             }
 
+            IActionResult result = null;
+
             await _eventService.Subscribe<ValidationFailedEvent>((failedEvent) =>
             {
                 failedEvent.ValidationResult.AddToModelState(ModelState, null);
+                result = BadRequest(ModelState);
+            });
+
+            await _eventService.Subscribe<WatchNextItemExpiredEvent>((successEvent) =>
+            {
+                result = NoContent();
             });
 
             await _eventService.IssueCommand(new ExpireWatchNextItemCommand
@@ -70,20 +78,23 @@ namespace FilmQueue.WebApi.Controllers
                 ItemId = record.Id
             });
 
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            return NoContent();
+            return result;
         }
 
         [HttpPost("newwatchnextrequests")]
         public async Task<IActionResult> SelectNewWatchNextItem()
         {
+            IActionResult result = null;
+
             await _eventService.Subscribe<ValidationFailedEvent>((failedEvent) =>
             {
                 failedEvent.ValidationResult.AddToModelState(ModelState, null);
+                result = BadRequest(ModelState);
+            });
+
+            await _eventService.Subscribe<NewWatchNextItemSelectedEvent>((successEvent) =>
+            {
+                result = NoContent();
             });
 
             await _eventService.IssueCommand(new SelectNewWatchNextItemCommand
@@ -91,12 +102,7 @@ namespace FilmQueue.WebApi.Controllers
                 UserId = _currentUserAccessor.CurrentUser.Id
             });
 
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            return NoContent();
+            return result;
         }
     }
 }
