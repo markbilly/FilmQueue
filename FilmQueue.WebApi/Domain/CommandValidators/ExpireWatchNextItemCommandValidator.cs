@@ -12,9 +12,9 @@ namespace FilmQueue.WebApi.Domain.CommandValidators
 {
     public class ExpireWatchNextItemCommandValidator : AbstractValidator<ExpireWatchNextItemCommand>
     {
-        private readonly IWatchlistItemReader _watchlistItemReader;
+        private readonly IFilmReader _watchlistItemReader;
 
-        public ExpireWatchNextItemCommandValidator(IWatchlistItemReader watchlistItemReader)
+        public ExpireWatchNextItemCommandValidator(IFilmReader watchlistItemReader)
         {
             _watchlistItemReader = watchlistItemReader;
 
@@ -27,12 +27,12 @@ namespace FilmQueue.WebApi.Domain.CommandValidators
 
         private async Task<bool> WatchlistItemExists(long itemId, CancellationToken cancellationToken)
         {
-            return (await _watchlistItemReader.GetById(itemId)) != null;
+            return (await _watchlistItemReader.GetFilmById(itemId)) != null;
         }
 
         private async Task<bool> IsActiveWatchNext(long itemId, CancellationToken cancellationToken)
         {
-            var record = await _watchlistItemReader.GetById(itemId);
+            var record = await _watchlistItemReader.GetFilmById(itemId);
             return record.WatchNextStart.HasValue && !record.WatchNextEnd.HasValue;
         }
     }

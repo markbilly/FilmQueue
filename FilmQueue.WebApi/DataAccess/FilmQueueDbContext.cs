@@ -18,6 +18,6 @@ namespace FilmQueue.WebApi.DataAccess
             base.OnModelCreating(modelBuilder);
         }
 
-        public DbSet<WatchlistItemRecord> WatchlistItemRecords { get; set; }
+        public DbSet<FilmRecord> WatchlistItemRecords { get; set; }
     }
 }

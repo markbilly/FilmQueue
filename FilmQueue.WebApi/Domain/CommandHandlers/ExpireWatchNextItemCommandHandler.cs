@@ -14,13 +14,13 @@ namespace FilmQueue.WebApi.Domain.CommandHandlers
     public class ExpireWatchNextItemCommandHandler : ICommandHandler<ExpireWatchNextItemCommand>
     {
         private readonly IValidator<ExpireWatchNextItemCommand> _validator;
-        private readonly IWatchlistItemWriter _watchlistItemWriter;
+        private readonly IFilmWriter _watchlistItemWriter;
         private readonly IEventService _eventService;
         private readonly FilmQueueDbUnitOfWork _unitOfWork;
 
         public ExpireWatchNextItemCommandHandler(
             IValidator<ExpireWatchNextItemCommand> validator,
-            IWatchlistItemWriter watchlistItemWriter,
+            IFilmWriter watchlistItemWriter,
             IEventService eventService,
             FilmQueueDbUnitOfWork unitOfWork)
         {

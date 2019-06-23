@@ -18,21 +18,18 @@ namespace FilmQueue.WebApi.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("api/watchlist")]
+    [Route("users/me/watchlist")]
     public class WatchlistController : ControllerBase
     {
         private readonly ICurrentUserAccessor _currentUserAccessor;
-        private readonly IWatchlistItemReader _watchlistItemReader;
-        private readonly IEventService _eventService;
+        private readonly IFilmReader _watchlistItemReader;
 
         public WatchlistController(
             ICurrentUserAccessor currentUserAccessor,
-            IWatchlistItemReader watchlistItemReader,
-            IEventService eventService)
+            IFilmReader watchlistItemReader)
         {
             _currentUserAccessor = currentUserAccessor;
             _watchlistItemReader = watchlistItemReader;
-            _eventService = eventService;
         }
         
         [HttpGet]

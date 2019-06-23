@@ -8,20 +8,22 @@ using System.Threading.Tasks;
 
 namespace FilmQueue.WebApi.DataAccess
 {
-    public interface IWatchlistItemWriter : IDependency
+    public interface IFilmWriter : IDependency
     {
-        Task<WatchlistItemRecord> Create(string userId, string title, int runtimeInMinutes);
+        Task<FilmRecord> Create(string userId, string title, int runtimeInMinutes);
+        void MarkFilmAsWatched(long filmId);
+
+        // Move to WatchNextWriter
         void SetWatchNextStartDateToNow(long id);
         void SetWatchNextEndDateToNow(long id);
-        void SetWatchedDateToNow(long id);
     }
 
-    public class WatchlistItemWriter : IWatchlistItemWriter
+    public class FilmWriter : IFilmWriter
     {
         private readonly FilmQueueDbContext _dbContext;
         private readonly IClock _clock;
 
-        public WatchlistItemWriter(
+        public FilmWriter(
             FilmQueueDbContext dbContext,
             IClock clock)
         {
@@ -29,9 +31,9 @@ namespace FilmQueue.WebApi.DataAccess
             _clock = clock;
         }
 
-        public async Task<WatchlistItemRecord> Create(string userId, string title, int runtimeInMinutes)
+        public async Task<FilmRecord> Create(string userId, string title, int runtimeInMinutes)
         {
-            var created = await _dbContext.AddAsync(new WatchlistItemRecord
+            var created = await _dbContext.AddAsync(new FilmRecord
             {
                 Title = title,
                 RuntimeInMinutes = runtimeInMinutes,
@@ -42,9 +44,9 @@ namespace FilmQueue.WebApi.DataAccess
             return created.Entity;
         }
 
-        public void SetWatchedDateToNow(long id)
+        public void MarkFilmAsWatched(long filmId)
         {
-            var item = _dbContext.WatchlistItemRecords.SingleOrDefault(x => x.Id == id);
+            var item = _dbContext.WatchlistItemRecords.SingleOrDefault(x => x.Id == filmId);
 
             if (item == null)
             {

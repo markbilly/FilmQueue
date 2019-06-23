@@ -13,7 +13,7 @@ namespace FilmQueue.WebApi.Domain.Models
         public int RuntimeInMinutes { get; set; }
         public bool Watched { get; set; }
 
-        public static WatchlistItem FromRecord(WatchlistItemRecord record)
+        public static WatchlistItem FromRecord(FilmRecord record)
         {
             return new WatchlistItem
             {

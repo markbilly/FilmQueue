@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace FilmQueue.WebApi.DataAccess.Models
 {
-    public class WatchlistItemRecord
+    public class FilmRecord
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

@@ -23,7 +23,7 @@ namespace FilmQueue.WebApi.Models.Responses
             };
         }
 
-        public static WatchlistItemResponse FromRecord(WatchlistItemRecord record)
+        public static WatchlistItemResponse FromRecord(FilmRecord record)
         {
             return new WatchlistItemResponse
             {

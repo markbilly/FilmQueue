@@ -15,13 +15,13 @@ namespace FilmQueue.WebApi.Domain.CommandHandlers
 {
     public class UpdateWatchlistItemCommandHandler : ICommandHandler<UpdateWatchlistItemCommand>
     {
-        private readonly IWatchlistItemReader _watchlistItemReader;
+        private readonly IFilmReader _watchlistItemReader;
         private readonly IValidator<UpdateWatchlistItemCommand> _validator;
         private readonly IEventService _eventService;
         private readonly FilmQueueDbUnitOfWork _unitOfWork;
 
         public UpdateWatchlistItemCommandHandler(
-            IWatchlistItemReader watchlistItemReader,
+            IFilmReader watchlistItemReader,
             IValidator<UpdateWatchlistItemCommand> validator,
             IEventService eventService,
             FilmQueueDbUnitOfWork unitOfWork)
@@ -48,7 +48,7 @@ namespace FilmQueue.WebApi.Domain.CommandHandlers
                 return;
             }
 
-            var record = await _watchlistItemReader.GetById(command.ItemId);
+            var record = await _watchlistItemReader.GetFilmById(command.ItemId);
 
             _unitOfWork.Execute(() =>
             {

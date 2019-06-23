@@ -20,16 +20,16 @@ namespace FilmQueue.WebApi.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("api/watchlist/items")]
-    public class WatchlistItemController : ControllerBase
+    [Route("users/me/films")]
+    public class FilmsController : ControllerBase
     {
         private readonly ICurrentUserAccessor _currentUserAccessor;
-        private readonly IWatchlistItemReader _watchlistItemReader;
+        private readonly IFilmReader _watchlistItemReader;
         private readonly IEventService _eventService;
 
-        public WatchlistItemController(
+        public FilmsController(
             ICurrentUserAccessor currentUserAccessor,
-            IWatchlistItemReader watchlistItemReader,
+            IFilmReader watchlistItemReader,
             IEventService eventService)
         {
             _currentUserAccessor = currentUserAccessor;
@@ -39,16 +39,16 @@ namespace FilmQueue.WebApi.Controllers
 
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(WatchlistItemResponse), 200)]
-        public async Task<IActionResult> GetWatchlistItem([FromRoute] long id)
+        public async Task<IActionResult> GetFilm([FromRoute] long id)
         {
-            var record = await _watchlistItemReader.GetById(id);
+            var record = await _watchlistItemReader.GetFilmById(id);
 
             return Ok(WatchlistItemResponse.FromRecord(record));
         }
 
         [HttpPut("{id}")]
         [ProducesResponseType(typeof(WatchlistItemResponse), 200)]
-        public async Task<IActionResult> UpdateWatchlistItem([FromRoute] long id, [FromBody] UpdateWatchlistItemRequest request)
+        public async Task<IActionResult> UpdateFilm([FromRoute] long id, [FromBody] UpdateWatchlistItemRequest request)
         {
             IActionResult result = null;
 
@@ -81,7 +81,7 @@ namespace FilmQueue.WebApi.Controllers
 
         [HttpPut("{id}/watched")]
         [ProducesResponseType(typeof(bool), 200)]
-        public async Task<IActionResult> SetItemToWatched([FromBody] UpdateWatchlistItemWatchedRequest request)
+        public async Task<IActionResult> SetFilmToWatched([FromBody] UpdateWatchlistItemWatchedRequest request)
         {
             IActionResult result = null;
 
@@ -107,7 +107,7 @@ namespace FilmQueue.WebApi.Controllers
 
         [HttpPost]
         [ProducesResponseType(typeof(WatchlistItemResponse), 201)]
-        public async Task<IActionResult> CreateWatchlistItem([FromBody] CreateToWatchlistItemRequest createWatchlistItemRequest)
+        public async Task<IActionResult> CreateFilm([FromBody] CreateToWatchlistItemRequest createWatchlistItemRequest)
         {
             IActionResult result = null;
 
@@ -120,7 +120,7 @@ namespace FilmQueue.WebApi.Controllers
             await _eventService.Subscribe<WatchlistItemCreatedEvent>((createdEvent) =>
             {
                 result = CreatedAtAction(
-                    nameof(GetWatchlistItem),
+                    nameof(GetFilm),
                     new { id = createdEvent.ItemId },
                     WatchlistItemResponse.FromDomainModel(createdEvent.Item));
             });

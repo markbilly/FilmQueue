@@ -16,16 +16,16 @@ namespace FilmQueue.WebApi.Domain.CommandHandlers
 {
     public class SelectWatchNextItemCommandHandler : ICommandHandler<SelectWatchNextItemCommand>
     {
-        private readonly IWatchlistItemWriter _watchlistItemWriter;
-        private readonly IWatchlistItemReader _watchlistItemReader;
+        private readonly IFilmWriter _watchlistItemWriter;
+        private readonly IFilmReader _watchlistItemReader;
         private readonly IValidator<SelectWatchNextItemCommand> _validator;
         private readonly IEventService _eventService;
         private readonly IMemoryCache _memoryCache;
         private readonly FilmQueueDbUnitOfWork _unitOfWork;
 
         public SelectWatchNextItemCommandHandler(
-            IWatchlistItemWriter watchlistItemWriter,
-            IWatchlistItemReader watchlistItemReader,
+            IFilmWriter watchlistItemWriter,
+            IFilmReader watchlistItemReader,
             IValidator<SelectWatchNextItemCommand> validator,
             IEventService eventService,
             IMemoryCache memoryCache,
@@ -56,8 +56,8 @@ namespace FilmQueue.WebApi.Domain.CommandHandlers
             }
 
             var record = command.ItemId.HasValue
-                ? await _watchlistItemReader.GetById(command.ItemId.Value)
-                : await _watchlistItemReader.GetRandomUnwatchedItem(command.UserId);
+                ? await _watchlistItemReader.GetFilmById(command.ItemId.Value)
+                : await _watchlistItemReader.GetRandomUnwatchedFilm(command.UserId);
 
             _unitOfWork.Execute(() =>
             {

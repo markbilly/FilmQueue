@@ -19,16 +19,16 @@ namespace FilmQueue.WebApi.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("api/watchlist/items/watchnext")]
+    [Route("users/me/watchnext")]
     public class WatchNextController : ControllerBase
     {
         private readonly ICurrentUserAccessor _currentUserAccessor;
-        private readonly IWatchlistItemReader _watchlistItemReader;
+        private readonly IFilmReader _watchlistItemReader;
         private readonly IEventService _eventService;
 
         public WatchNextController(
             ICurrentUserAccessor currentUserAccessor,
-            IWatchlistItemReader watchlistItemReader,
+            IFilmReader watchlistItemReader,
             IEventService eventService)
         {
             _currentUserAccessor = currentUserAccessor;

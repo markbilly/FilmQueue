@@ -14,13 +14,13 @@ namespace FilmQueue.WebApi.Domain.CommandHandlers
 {
     public class CreateWatchlistItemCommandHandler : ICommandHandler<CreateWatchlistItemCommand>
     {
-        private readonly IWatchlistItemWriter _watchlistItemWriter;
+        private readonly IFilmWriter _watchlistItemWriter;
         private readonly IValidator<CreateWatchlistItemCommand> _validator;
         private readonly IEventService _eventService;
         private readonly FilmQueueDbUnitOfWork _unitOfWork;
 
         public CreateWatchlistItemCommandHandler(
-            IWatchlistItemWriter watchlistItemWriter,
+            IFilmWriter watchlistItemWriter,
             IValidator<CreateWatchlistItemCommand> validator,
             IEventService eventService,
             FilmQueueDbUnitOfWork unitOfWork)

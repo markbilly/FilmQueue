@@ -1,0 +1,3 @@
+Rename "watchlist item" to "film"
+Move not found validation out of commandvalidators
+Run command validators via [Validate] attribute on command handler

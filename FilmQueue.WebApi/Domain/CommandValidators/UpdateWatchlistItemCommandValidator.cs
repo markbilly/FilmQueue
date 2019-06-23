@@ -12,9 +12,9 @@ namespace FilmQueue.WebApi.Domain.CommandValidators
 {
     public class UpdateWatchlistItemCommandValidator : AbstractValidator<UpdateWatchlistItemCommand>
     {
-        private readonly IWatchlistItemReader _watchlistItemReader;
+        private readonly IFilmReader _watchlistItemReader;
 
-        public UpdateWatchlistItemCommandValidator(IWatchlistItemReader watchlistItemReader)
+        public UpdateWatchlistItemCommandValidator(IFilmReader watchlistItemReader)
         {
             _watchlistItemReader = watchlistItemReader;
 
@@ -33,7 +33,7 @@ namespace FilmQueue.WebApi.Domain.CommandValidators
 
         private async Task<bool> WatchlistItemExists(long itemId, CancellationToken cancellationToken)
         {
-            return (await _watchlistItemReader.GetById(itemId)) != null;
+            return (await _watchlistItemReader.GetFilmById(itemId)) != null;
         }
     }
 }

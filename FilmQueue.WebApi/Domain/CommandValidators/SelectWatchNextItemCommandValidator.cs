@@ -11,9 +11,9 @@ namespace FilmQueue.WebApi.Domain.CommandValidators
 {
     public class SelectWatchNextItemCommandValidator : AbstractValidator<SelectWatchNextItemCommand>
     {
-        private readonly IWatchlistItemReader _watchlistItemReader;
+        private readonly IFilmReader _watchlistItemReader;
 
-        public SelectWatchNextItemCommandValidator(IWatchlistItemReader watchlistItemReader)
+        public SelectWatchNextItemCommandValidator(IFilmReader watchlistItemReader)
         {
             _watchlistItemReader = watchlistItemReader;
 
@@ -46,7 +46,7 @@ namespace FilmQueue.WebApi.Domain.CommandValidators
 
         private async Task<bool> UserHasUnwatchedItems(string userId, CancellationToken cancellationToken)
         {
-            var unwatchedItemCount = await _watchlistItemReader.GetUnwatchedItemCount(userId);
+            var unwatchedItemCount = await _watchlistItemReader.GetUnwatchedFilmCount(userId);
             return unwatchedItemCount > 0;
         }
     }

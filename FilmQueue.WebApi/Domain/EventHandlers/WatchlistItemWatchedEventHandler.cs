@@ -12,11 +12,11 @@ namespace FilmQueue.WebApi.Domain.EventHandlers
 {
     public class WatchlistItemWatchedEventHandler : IEventHandler<WatchlistItemWatchedEvent>
     {
-        private readonly IWatchlistItemReader _watchlistItemReader;
+        private readonly IFilmReader _watchlistItemReader;
         private readonly IEventService _eventService;
 
         public WatchlistItemWatchedEventHandler(
-            IWatchlistItemReader watchlistItemReader,
+            IFilmReader watchlistItemReader,
             IEventService eventService)
         {
             _watchlistItemReader = watchlistItemReader;
@@ -25,7 +25,7 @@ namespace FilmQueue.WebApi.Domain.EventHandlers
 
         public async Task Handle(WatchlistItemWatchedEvent @event)
         {
-            var record = await _watchlistItemReader.GetById(@event.ItemId);
+            var record = await _watchlistItemReader.GetFilmById(@event.ItemId);
 
             if (IsActiveWatchNext(record))
             {
@@ -36,7 +36,7 @@ namespace FilmQueue.WebApi.Domain.EventHandlers
             }
         }
 
-        private bool IsActiveWatchNext(WatchlistItemRecord record)
+        private bool IsActiveWatchNext(FilmRecord record)
         {
             return record.WatchNextStart.HasValue && !record.WatchNextEnd.HasValue;
         }
