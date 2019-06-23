@@ -10,15 +10,15 @@ using System.Threading.Tasks;
 
 namespace FilmQueue.WebApi.Domain.CommandValidators
 {
-    public class UpdateWatchlistItemCommandValidator : AbstractValidator<UpdateWatchlistItemCommand>
+    public class UpdateFilmCommandValidator : AbstractValidator<UpdateFilmCommand>
     {
-        private readonly IFilmReader _watchlistItemReader;
+        private readonly IFilmReader _filmReader;
 
-        public UpdateWatchlistItemCommandValidator(IFilmReader watchlistItemReader)
+        public UpdateFilmCommandValidator(IFilmReader filmReader)
         {
-            _watchlistItemReader = watchlistItemReader;
+            _filmReader = filmReader;
 
-            RuleFor(x => x.ItemId).MustAsync(WatchlistItemExists)
+            RuleFor(x => x.FilmId).MustAsync(FilmExists)
                 .ResourceNotFoundRule();
 
             RuleFor(x => x.Title).NotEmpty()
@@ -31,9 +31,9 @@ namespace FilmQueue.WebApi.Domain.CommandValidators
                 .WithMessage("Runtime is not valid. Must be positive whole number.");
         }
 
-        private async Task<bool> WatchlistItemExists(long itemId, CancellationToken cancellationToken)
+        private async Task<bool> FilmExists(long filmId, CancellationToken cancellationToken)
         {
-            return (await _watchlistItemReader.GetFilmById(itemId)) != null;
+            return (await _filmReader.GetFilmById(filmId)) != null;
         }
     }
 }

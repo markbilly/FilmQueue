@@ -2,7 +2,6 @@
 using FilmQueue.WebApi.Domain.Commands;
 using FilmQueue.WebApi.Domain.Events;
 using FilmQueue.WebApi.Domain.Models;
-using FilmQueue.WebApi.Infrastructure;
 using FilmQueue.WebApi.Infrastructure.Events;
 using FilmQueue.WebApi.Infrastructure.FluentValidation;
 using FluentValidation;
@@ -13,32 +12,32 @@ using System.Threading.Tasks;
 
 namespace FilmQueue.WebApi.Domain.CommandHandlers
 {
-    public class UpdateWatchlistItemCommandHandler : ICommandHandler<UpdateWatchlistItemCommand>
+    public class CreateFilmCommandHandler : ICommandHandler<CreateFilmCommand>
     {
-        private readonly IFilmReader _watchlistItemReader;
-        private readonly IValidator<UpdateWatchlistItemCommand> _validator;
+        private readonly IFilmWriter _filmWriter;
+        private readonly IValidator<CreateFilmCommand> _validator;
         private readonly IEventService _eventService;
         private readonly FilmQueueDbUnitOfWork _unitOfWork;
 
-        public UpdateWatchlistItemCommandHandler(
-            IFilmReader watchlistItemReader,
-            IValidator<UpdateWatchlistItemCommand> validator,
+        public CreateFilmCommandHandler(
+            IFilmWriter filmWriter,
+            IValidator<CreateFilmCommand> validator,
             IEventService eventService,
             FilmQueueDbUnitOfWork unitOfWork)
         {
-            _watchlistItemReader = watchlistItemReader;
+            _filmWriter = filmWriter;
             _validator = validator;
             _eventService = eventService;
             _unitOfWork = unitOfWork;
         }
 
-        public async Task Handle(UpdateWatchlistItemCommand command)
+        public async Task Handle(CreateFilmCommand command)
         {
             var validationResult = await _validator.ValidateAsync(command);
 
             if (validationResult.IsResourceNotFoundResult())
             {
-                await _eventService.RaiseEvent(new ResourceNotFoundEvent(command.ItemId));
+                await _eventService.RaiseEvent(new ResourceNotFoundEvent());
                 return;
             }
 
@@ -48,19 +47,15 @@ namespace FilmQueue.WebApi.Domain.CommandHandlers
                 return;
             }
 
-            var record = await _watchlistItemReader.GetFilmById(command.ItemId);
-
-            _unitOfWork.Execute(() =>
+            var record = await _unitOfWork.Execute(async () =>
             {
-                record.Title = command.Title;
-                record.RuntimeInMinutes = command.RuntimeInMinutes;
-
-                // TODO: Audit the changes
+                return await _filmWriter.Create(command.UserId, command.Title, command.RuntimeInMinutes);
             });
 
-            await _eventService.RaiseEvent(new WatchlistItemUpdatedEvent
+            await _eventService.RaiseEvent(new FilmCreatedEvent
             {
-                Item = WatchlistItem.FromRecord(record)
+                FilmId = record.Id,
+                Film = Film.FromRecord(record)
             });
         }
     }

@@ -11,26 +11,26 @@ using System.Threading.Tasks;
 
 namespace FilmQueue.WebApi.Domain.CommandHandlers
 {
-    public class ExpireWatchNextItemCommandHandler : ICommandHandler<ExpireWatchNextItemCommand>
+    public class UpdateFilmWatchedCommandHandler : ICommandHandler<UpdateFilmWatchedCommand>
     {
-        private readonly IValidator<ExpireWatchNextItemCommand> _validator;
-        private readonly IFilmWriter _watchlistItemWriter;
+        private readonly IValidator<UpdateFilmWatchedCommand> _validator;
+        private readonly IFilmWriter _filmWriter;
         private readonly IEventService _eventService;
         private readonly FilmQueueDbUnitOfWork _unitOfWork;
 
-        public ExpireWatchNextItemCommandHandler(
-            IValidator<ExpireWatchNextItemCommand> validator,
-            IFilmWriter watchlistItemWriter,
+        public UpdateFilmWatchedCommandHandler(
+            IValidator<UpdateFilmWatchedCommand> validator,
+            IFilmWriter filmWriter,
             IEventService eventService,
             FilmQueueDbUnitOfWork unitOfWork)
         {
             _validator = validator;
-            _watchlistItemWriter = watchlistItemWriter;
+            _filmWriter = filmWriter;
             _eventService = eventService;
             _unitOfWork = unitOfWork;
         }
 
-        public async Task Handle(ExpireWatchNextItemCommand command)
+        public async Task Handle(UpdateFilmWatchedCommand command)
         {
             var validationResult = await _validator.ValidateAsync(command);
 
@@ -48,12 +48,12 @@ namespace FilmQueue.WebApi.Domain.CommandHandlers
 
             _unitOfWork.Execute(() =>
             {
-                _watchlistItemWriter.SetWatchNextEndDateToNow(command.ItemId);
+                _filmWriter.MarkFilmAsWatched(command.ItemId);
             });
 
-            await _eventService.RaiseEvent(new WatchNextItemExpiredEvent
+            await _eventService.RaiseEvent(new FilmUpdatedToWatchedEvent
             {
-                ItemId = command.ItemId
+                FilmId = command.ItemId
             });
         }
     }

@@ -6,16 +6,16 @@ using System.Threading.Tasks;
 
 namespace FilmQueue.WebApi.Domain.Models
 {
-    public class WatchlistItem
+    public class Film
     {
         public long Id { get; set; }
         public string Title { get; set; }
         public int RuntimeInMinutes { get; set; }
         public bool Watched { get; set; }
 
-        public static WatchlistItem FromRecord(FilmRecord record)
+        public static Film FromRecord(FilmRecord record)
         {
-            return new WatchlistItem
+            return new Film
             {
                 Id = record.Id,
                 Title = record.Title,

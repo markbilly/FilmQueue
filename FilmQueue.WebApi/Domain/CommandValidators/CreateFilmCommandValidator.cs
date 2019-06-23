@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace FilmQueue.WebApi.Domain.CommandValidators
 {
-    public class CreateWatchlistItemCommandValidator : AbstractValidator<CreateWatchlistItemCommand>
+    public class CreateFilmCommandValidator : AbstractValidator<CreateFilmCommand>
     {
-        public CreateWatchlistItemCommandValidator()
+        public CreateFilmCommandValidator()
         {
             RuleFor(x => x.Title).NotEmpty()
                 .WithMessage("Title is a required field.");

@@ -4,14 +4,16 @@ using FilmQueue.WebApi.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace FilmQueue.WebApi.Migrations
 {
     [DbContext(typeof(FilmQueueDbContext))]
-    partial class FilmQueueDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190623142235_AlterTable_WatchlistItems_Rename")]
+    partial class AlterTable_WatchlistItems_Rename
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -25,43 +27,25 @@ namespace FilmQueue.WebApi.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<DateTime>("CreatedDateTime");
-
-                    b.Property<string>("OwnedByUserId")
+                    b.Property<string>("CreatedByUserId")
                         .IsRequired();
+
+                    b.Property<DateTime>("CreatedDateTime");
 
                     b.Property<int>("RuntimeInMinutes");
 
                     b.Property<string>("Title")
                         .IsRequired();
 
+                    b.Property<DateTime?>("WatchNextEnd");
+
+                    b.Property<DateTime?>("WatchNextStart");
+
                     b.Property<DateTime?>("WatchedDateTime");
 
                     b.HasKey("Id");
 
                     b.ToTable("FilmRecords");
-                });
-
-            modelBuilder.Entity("FilmQueue.WebApi.DataAccess.Models.WatchNextSelectionRecord", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<DateTime?>("ExpiredDateDate");
-
-                    b.Property<long>("FilmId");
-
-                    b.Property<DateTime>("SelectedDateTime");
-
-                    b.Property<string>("UserId")
-                        .IsRequired();
-
-                    b.Property<bool?>("Watched");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("WatchNextSelectionRecords");
                 });
 #pragma warning restore 612, 618
         }

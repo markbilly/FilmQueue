@@ -22,23 +22,29 @@ namespace FilmQueue.WebApi.Controllers
     public class WatchlistController : ControllerBase
     {
         private readonly ICurrentUserAccessor _currentUserAccessor;
-        private readonly IFilmReader _watchlistItemReader;
+        private readonly IWatchlistReader _watchlistReader;
 
         public WatchlistController(
             ICurrentUserAccessor currentUserAccessor,
-            IFilmReader watchlistItemReader)
+            IWatchlistReader watchlistReader)
         {
             _currentUserAccessor = currentUserAccessor;
-            _watchlistItemReader = watchlistItemReader;
+            _watchlistReader = watchlistReader;
         }
         
+        /// <summary>
+        /// Get your watchlist
+        /// </summary>
+        /// <param name="page"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
         [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<QueryResponse<string>>), 200)]
+        [ProducesResponseType(typeof(IEnumerable<QueryResponse<FilmResponse>>), 200)]
         public async Task<IActionResult> GetWatchlist(int page = 1, int pageSize = 5)
         {
-            var records = await _watchlistItemReader.GetItemsByUserId(_currentUserAccessor.CurrentUser.Id, pageSize, (page - 1) * pageSize);
+            var records = await _watchlistReader.GetWatchlist(_currentUserAccessor.CurrentUser.Id, pageSize, (page - 1) * pageSize);
 
-            return Ok(QueryResponse<WatchlistItemResponse>.FromEnumerable(records, record => WatchlistItemResponse.FromRecord(record)));
+            return Ok(QueryResponse<FilmResponse>.FromEnumerable(records, record => FilmResponse.FromRecord(record)));
         }
     }
 }

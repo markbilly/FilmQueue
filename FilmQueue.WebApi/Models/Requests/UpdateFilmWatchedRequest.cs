@@ -5,9 +5,8 @@ using System.Threading.Tasks;
 
 namespace FilmQueue.WebApi.Models.Requests
 {
-    public class UpdateWatchlistItemWatchedRequest
+    public class UpdateFilmWatchedRequest
     {
-        public long ItemId { get; set; }
         public bool Watched { get; set; }
     }
 }

@@ -24,31 +24,47 @@ namespace FilmQueue.WebApi.Controllers
     public class FilmsController : ControllerBase
     {
         private readonly ICurrentUserAccessor _currentUserAccessor;
-        private readonly IFilmReader _watchlistItemReader;
+        private readonly IFilmReader _filmReader;
         private readonly IEventService _eventService;
 
         public FilmsController(
             ICurrentUserAccessor currentUserAccessor,
-            IFilmReader watchlistItemReader,
+            IFilmReader filmReader,
             IEventService eventService)
         {
             _currentUserAccessor = currentUserAccessor;
-            _watchlistItemReader = watchlistItemReader;
+            _filmReader = filmReader;
             _eventService = eventService;
         }
 
+        /// <summary>
+        /// Get a film you have saved
+        /// </summary>
+        /// <param name="id">ID for the film</param>
+        /// <returns></returns>
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(WatchlistItemResponse), 200)]
+        [ProducesResponseType(typeof(FilmResponse), 200)]
         public async Task<IActionResult> GetFilm([FromRoute] long id)
         {
-            var record = await _watchlistItemReader.GetFilmById(id);
+            var record = await _filmReader.GetFilmById(id);
 
-            return Ok(WatchlistItemResponse.FromRecord(record));
+            if (record == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(FilmResponse.FromRecord(record));
         }
 
+        /// <summary>
+        /// Edit a film you have saved
+        /// </summary>
+        /// <param name="id">ID for the film</param>
+        /// <param name="request">Updated properties for the film</param>
+        /// <returns></returns>
         [HttpPut("{id}")]
-        [ProducesResponseType(typeof(WatchlistItemResponse), 200)]
-        public async Task<IActionResult> UpdateFilm([FromRoute] long id, [FromBody] UpdateWatchlistItemRequest request)
+        [ProducesResponseType(typeof(FilmResponse), 200)]
+        public async Task<IActionResult> UpdateFilm([FromRoute] long id, [FromBody] UpdateFilmRequest request)
         {
             IActionResult result = null;
 
@@ -63,15 +79,15 @@ namespace FilmQueue.WebApi.Controllers
                 result = BadRequest(ModelState);
             });
 
-            await _eventService.Subscribe<WatchlistItemUpdatedEvent>((updatedEvent) =>
+            await _eventService.Subscribe<FilmUpdatedEvent>((updatedEvent) =>
             {
-                var response = WatchlistItemResponse.FromDomainModel(updatedEvent.Item);
+                var response = FilmResponse.FromDomainModel(updatedEvent.Film);
                 result = Ok(response);
             });
 
-            await _eventService.IssueCommand(new UpdateWatchlistItemCommand
+            await _eventService.IssueCommand(new UpdateFilmCommand
             {
-                ItemId = id,
+                FilmId = id,
                 Title = request.Title,
                 RuntimeInMinutes = request.RuntimeInMinutes
             });
@@ -79,9 +95,15 @@ namespace FilmQueue.WebApi.Controllers
             return result;
         }
 
+        /// <summary>
+        /// Update a film to indicate you have watched it
+        /// </summary>
+        /// <param name="id">ID for the film</param>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPut("{id}/watched")]
         [ProducesResponseType(typeof(bool), 200)]
-        public async Task<IActionResult> SetFilmToWatched([FromBody] UpdateWatchlistItemWatchedRequest request)
+        public async Task<IActionResult> SetFilmToWatched([FromRoute] long id, [FromBody] UpdateFilmWatchedRequest request)
         {
             IActionResult result = null;
 
@@ -96,18 +118,23 @@ namespace FilmQueue.WebApi.Controllers
                 result = BadRequest(ModelState);
             });
 
-            await _eventService.IssueCommand(new UpdateWatchlistItemWatchedCommand
+            await _eventService.IssueCommand(new UpdateFilmWatchedCommand
             {
-                ItemId = request.ItemId,
+                ItemId = id,
                 Watched = request.Watched
             });
 
             return result ?? Ok(request.Watched);
         }
 
+        /// <summary>
+        /// Save a film you want to watch
+        /// </summary>
+        /// <param name="request">Film properties</param>
+        /// <returns></returns>
         [HttpPost]
-        [ProducesResponseType(typeof(WatchlistItemResponse), 201)]
-        public async Task<IActionResult> CreateFilm([FromBody] CreateToWatchlistItemRequest createWatchlistItemRequest)
+        [ProducesResponseType(typeof(FilmResponse), 201)]
+        public async Task<IActionResult> CreateFilm([FromBody] CreateFilmRequest request)
         {
             IActionResult result = null;
 
@@ -117,18 +144,18 @@ namespace FilmQueue.WebApi.Controllers
                 result = BadRequest(ModelState);
             });
 
-            await _eventService.Subscribe<WatchlistItemCreatedEvent>((createdEvent) =>
+            await _eventService.Subscribe<FilmCreatedEvent>((createdEvent) =>
             {
                 result = CreatedAtAction(
                     nameof(GetFilm),
-                    new { id = createdEvent.ItemId },
-                    WatchlistItemResponse.FromDomainModel(createdEvent.Item));
+                    new { id = createdEvent.FilmId },
+                    FilmResponse.FromDomainModel(createdEvent.Film));
             });
 
-            await _eventService.IssueCommand(new CreateWatchlistItemCommand
+            await _eventService.IssueCommand(new CreateFilmCommand
             {
-                Title = createWatchlistItemRequest.Title,
-                RuntimeInMinutes = createWatchlistItemRequest.RuntimeInMinutes,
+                Title = request.Title,
+                RuntimeInMinutes = request.RuntimeInMinutes,
                 UserId = _currentUserAccessor.CurrentUser.Id
             });
 

@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace FilmQueue.WebApi.Domain.Commands
 {
-    public class CreateWatchlistItemCommand : ICommand
+    public class UpdateFilmCommand : ICommand
     {
-        public string UserId { get; set; }
+        public long FilmId { get; set; }
         public string Title { get; set; }
         public int RuntimeInMinutes { get; set; }
     }

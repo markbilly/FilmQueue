@@ -14,12 +14,6 @@ namespace FilmQueue.WebApi.DataAccess
         Task<FilmRecord> GetFilmById(long filmId);
         Task<FilmRecord> GetRandomUnwatchedFilm(string userId);
         Task<int> GetUnwatchedFilmCount(string userId);
-
-        // Move to WatchNextReader
-        Task<FilmRecord> GetCurrentWatchNextItem(string userId);
-
-        // Move to WatchlistReader
-        Task<IEnumerable<FilmRecord>> GetItemsByUserId(string userId, int take = 5, int skip = 0);
     }
 
     public class FilmReader : IFilmReader
@@ -35,30 +29,9 @@ namespace FilmQueue.WebApi.DataAccess
             _memoryCache = memoryCache;
         }
 
-        public async Task<FilmRecord> GetCurrentWatchNextItem(string userId)
-        {
-            return await _memoryCache.GetOrCreateAsync(CacheKeys.WatchNext(userId), entry =>
-            {
-                return _dbContext.WatchlistItemRecords
-                    .Where(item => item.CreatedByUserId == userId && item.WatchNextStart.HasValue && !item.WatchNextEnd.HasValue)
-                    .SingleOrDefaultAsync();
-            });
-        }
-
         public Task<FilmRecord> GetFilmById(long filmId)
         {
-            return _dbContext.WatchlistItemRecords.FirstOrDefaultAsync(item => item.Id == filmId);
-        }
-
-        public async Task<IEnumerable<FilmRecord>> GetItemsByUserId(string userId, int take = 5, int skip = 0)
-        {
-            return await _dbContext.WatchlistItemRecords
-                .Where(item => item.CreatedByUserId.Equals(userId))
-                .OrderByDescending(item => item.CreatedDateTime)
-                .Skip(skip)
-                .Take(take)
-                .ToListAsync()
-                .ConfigureAwait(false);
+            return _dbContext.FilmRecords.FirstOrDefaultAsync(item => item.Id == filmId);
         }
 
         public async Task<FilmRecord> GetRandomUnwatchedFilm(string userId)
@@ -78,8 +51,8 @@ namespace FilmQueue.WebApi.DataAccess
 
         private IQueryable<FilmRecord> GetUnwatchedItems(string userId)
         {
-            return _dbContext.WatchlistItemRecords
-                .Where(item => item.CreatedByUserId == userId && !item.WatchedDateTime.HasValue);
+            return _dbContext.FilmRecords
+                .Where(item => item.OwnedByUserId == userId && !item.WatchedDateTime.HasValue);
         }
     }
 }

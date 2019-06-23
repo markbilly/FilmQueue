@@ -36,7 +36,7 @@ namespace FilmQueue.WebApi.Infrastructure.Events
                 _commandHandlersByCommandType.Add(commandType, handler);
             }
 
-            await (Task)handlerType.GetMethod("Execute").Invoke(handler, new object[] { command });
+            await (Task)handlerType.GetMethod("Handle").Invoke(handler, new object[] { command });
         }
 
         public async Task RaiseEvent<TEvent>(TEvent @event) where TEvent : class, IEvent
@@ -53,7 +53,7 @@ namespace FilmQueue.WebApi.Infrastructure.Events
 
             foreach (var handler in handlers)
             {
-                await (Task)handlerType.GetMethod("Execute").Invoke(handler, new object[] { @event });
+                await (Task)handlerType.GetMethod("Handle").Invoke(handler, new object[] { @event });
             }
 
             IList<IEventSubscription> subscriptions;

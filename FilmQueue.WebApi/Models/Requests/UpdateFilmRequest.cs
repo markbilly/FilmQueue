@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace FilmQueue.WebApi.Models.Requests
 {
-    public class SelectWatchNextItemRequest
+    public class UpdateFilmRequest
     {
-        public long? ItemId { get; set; }
-        public bool SelectRandomItem { get; set; }
+        public string Title { get; set; }
+        public int RuntimeInMinutes { get; set; }
     }
 }

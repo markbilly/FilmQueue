@@ -7,15 +7,15 @@ using System.Threading.Tasks;
 
 namespace FilmQueue.WebApi.Models.Responses
 {
-    public class WatchlistItemResponse
+    public class FilmResponse
     {
         public long Id { get; set; }
         public string Title { get; private set; }
         public string Runtime { get; private set; }
 
-        public static WatchlistItemResponse FromDomainModel(WatchlistItem watchlistItem)
+        public static FilmResponse FromDomainModel(Film watchlistItem)
         {
-            return new WatchlistItemResponse
+            return new FilmResponse
             {
                 Id = watchlistItem.Id,
                 Title = watchlistItem.Title,
@@ -23,9 +23,9 @@ namespace FilmQueue.WebApi.Models.Responses
             };
         }
 
-        public static WatchlistItemResponse FromRecord(FilmRecord record)
+        public static FilmResponse FromRecord(FilmRecord record)
         {
-            return new WatchlistItemResponse
+            return new FilmResponse
             {
                 Id = record.Id,
                 Title = record.Title,

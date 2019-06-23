@@ -12,10 +12,6 @@ namespace FilmQueue.WebApi.DataAccess
     {
         Task<FilmRecord> Create(string userId, string title, int runtimeInMinutes);
         void MarkFilmAsWatched(long filmId);
-
-        // Move to WatchNextWriter
-        void SetWatchNextStartDateToNow(long id);
-        void SetWatchNextEndDateToNow(long id);
     }
 
     public class FilmWriter : IFilmWriter
@@ -38,7 +34,7 @@ namespace FilmQueue.WebApi.DataAccess
                 Title = title,
                 RuntimeInMinutes = runtimeInMinutes,
                 CreatedDateTime = _clock.UtcNow,
-                CreatedByUserId = userId
+                OwnedByUserId = userId
             });
 
             return created.Entity;
@@ -46,38 +42,14 @@ namespace FilmQueue.WebApi.DataAccess
 
         public void MarkFilmAsWatched(long filmId)
         {
-            var item = _dbContext.WatchlistItemRecords.SingleOrDefault(x => x.Id == filmId);
+            var filmRecord = _dbContext.FilmRecords.SingleOrDefault(x => x.Id == filmId);
 
-            if (item == null)
+            if (filmRecord == null)
             {
                 return;
             }
 
-            item.WatchedDateTime = _clock.UtcNow;
-        }
-
-        public void SetWatchNextEndDateToNow(long id)
-        {
-            var item = _dbContext.WatchlistItemRecords.SingleOrDefault(x => x.Id == id);
-
-            if (item == null)
-            {
-                return;
-            }
-
-            item.WatchNextEnd = _clock.UtcNow;
-        }
-
-        public void SetWatchNextStartDateToNow(long id)
-        {
-            var item = _dbContext.WatchlistItemRecords.SingleOrDefault(x => x.Id == id);
-
-            if (item == null)
-            {
-                return;
-            }
-
-            item.WatchNextStart = _clock.UtcNow;
+            filmRecord.WatchedDateTime = _clock.UtcNow;
         }
     }
 }

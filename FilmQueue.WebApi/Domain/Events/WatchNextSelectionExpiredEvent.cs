@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace FilmQueue.WebApi.Domain.Events
 {
-    public class WatchlistItemWatchedEvent : IEvent
+    public class WatchNextSelectionExpiredEvent : IEvent
     {
-        public long ItemId { get; set; }
+        public long FilmId { get; set; }
     }
 }

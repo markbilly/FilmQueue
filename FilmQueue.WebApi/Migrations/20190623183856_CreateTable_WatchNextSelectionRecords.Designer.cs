@@ -4,14 +4,16 @@ using FilmQueue.WebApi.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace FilmQueue.WebApi.Migrations
 {
     [DbContext(typeof(FilmQueueDbContext))]
-    partial class FilmQueueDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190623183856_CreateTable_WatchNextSelectionRecords")]
+    partial class CreateTable_WatchNextSelectionRecords
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

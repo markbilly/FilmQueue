@@ -7,27 +7,23 @@ using System.Threading.Tasks;
 
 namespace FilmQueue.WebApi.DataAccess.Models
 {
-    public class FilmRecord
+    public class WatchNextSelectionRecord
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long Id { get; set; }
 
         [Required]
-        public string Title { get; set; }
+        public string UserId { get; set; }
 
         [Required]
-        public int RuntimeInMinutes { get; set; }
+        public long FilmId { get; set; }
 
         [Required]
-        public DateTime CreatedDateTime { get; set; }
+        public DateTime SelectedDateTime { get; set; }
 
-        [Required]
-        public string OwnedByUserId { get; set; }
+        public DateTime? ExpiredDateTime { get; set; }
 
-        //public DateTime? WatchNextStart { get; set; }
-        //public DateTime? WatchNextEnd { get; set; }
-
-        public DateTime? WatchedDateTime { get; set; }
+        public bool? Watched { get; set; }
     }
 }
