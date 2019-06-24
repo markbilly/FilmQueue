@@ -19,7 +19,7 @@ namespace FilmQueue.WebApi.Domain.CommandValidators
             _filmReader = filmReader;
 
             RuleFor(x => x.ItemId).MustAsync(FilmExists)
-                .ResourceNotFoundRule();
+                .NotFoundRule();
 
             RuleFor(x => x.Watched).Must(x => x == true)
                 .WithMessage("You cannot unwatch a film.");

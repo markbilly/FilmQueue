@@ -17,9 +17,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace FilmQueue.WebApi.Controllers
 {
     [Authorize]
-    [ApiController]
     [Route("users/me/watchlist")]
-    public class WatchlistController : ControllerBase
+    public class WatchlistController : ApiController
     {
         private readonly ICurrentUserAccessor _currentUserAccessor;
         private readonly IWatchlistReader _watchlistReader;

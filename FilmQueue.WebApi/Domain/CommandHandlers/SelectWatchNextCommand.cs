@@ -37,13 +37,6 @@ namespace FilmQueue.WebApi.Domain.CommandHandlers
         public async Task Handle(SelectWatchNextCommand command)
         {
             var validationResult = await _validator.ValidateAsync(command);
-
-            if (validationResult.IsResourceNotFoundResult())
-            {
-                await _eventService.RaiseEvent(new ResourceNotFoundEvent());
-                return;
-            }
-
             if (!validationResult.IsValid)
             {
                 await _eventService.RaiseEvent(new ValidationFailedEvent(validationResult));

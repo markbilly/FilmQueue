@@ -8,7 +8,7 @@ namespace FilmQueue.WebApi.Infrastructure.FluentValidation
 {
     public static class ValidationResultExtensions
     {
-        public static bool IsResourceNotFoundResult(this ValidationResult validationResult)
+        public static bool IsNotFoundResult(this ValidationResult validationResult)
         {
             return validationResult.Errors.Any(error => error.ErrorCode == "404");
         }

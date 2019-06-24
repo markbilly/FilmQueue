@@ -23,7 +23,7 @@ namespace FilmQueue.WebApi.Domain.CommandValidators
             _filmReader = filmReader;
 
             RuleFor(x => x.FilmId).MustAsync(FilmExists)
-                .ResourceNotFoundRule();
+                .NotFoundRule();
 
             RuleFor(x => x.FilmId).MustAsync(IsActiveWatchNext)
                 .WithMessage("Film is not the active watch next selection.");

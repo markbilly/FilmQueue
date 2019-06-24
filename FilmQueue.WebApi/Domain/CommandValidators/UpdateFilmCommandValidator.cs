@@ -19,7 +19,7 @@ namespace FilmQueue.WebApi.Domain.CommandValidators
             _filmReader = filmReader;
 
             RuleFor(x => x.FilmId).MustAsync(FilmExists)
-                .ResourceNotFoundRule();
+                .NotFoundRule();
 
             RuleFor(x => x.Title).NotEmpty()
                 .WithMessage("Title is a required field.");

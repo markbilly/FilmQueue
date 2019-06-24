@@ -1,7 +1,11 @@
 ﻿using Autofac;
+using FilmQueue.WebApi.Infrastructure.FluentValidation;
+using FluentValidation;
+using FluentValidation.Results;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace FilmQueue.WebApi.Infrastructure.Events
@@ -15,8 +19,7 @@ namespace FilmQueue.WebApi.Infrastructure.Events
 
         private readonly object _lock = new object();
 
-        public ImmediateExecutionEventService(
-            ILifetimeScope container)
+        public ImmediateExecutionEventService(ILifetimeScope container)
         {
             _commandHandlersByCommandType = new Dictionary<Type, object>();
             _eventHandlersByEventType = new Dictionary<Type, IEnumerable<object>>();

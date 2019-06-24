@@ -18,9 +18,8 @@ using FluentValidation.AspNetCore;
 namespace FilmQueue.WebApi.Controllers
 {
     [Authorize]
-    [ApiController]
     [Route("users/me/watchnext")]
-    public class WatchNextController : ControllerBase
+    public class WatchNextController : ApiController
     {
         private readonly ICurrentUserAccessor _currentUserAccessor;
         private readonly IWatchNextReader _watchNextReader;
@@ -72,8 +71,7 @@ namespace FilmQueue.WebApi.Controllers
 
             await _eventService.Subscribe<ValidationFailedEvent>((failedEvent) =>
             {
-                failedEvent.ValidationResult.AddToModelState(ModelState, null);
-                result = BadRequest(ModelState);
+                result = FromFailedValidationResult(failedEvent);
             });
 
             await _eventService.Subscribe<WatchNextSelectionExpiredEvent>((successEvent) =>
@@ -101,15 +99,9 @@ namespace FilmQueue.WebApi.Controllers
         {
             IActionResult result = null;
 
-            await _eventService.Subscribe<ResourceNotFoundEvent>((notFoundEvent) =>
-            {
-                result = NotFound();
-            });
-
             await _eventService.Subscribe<ValidationFailedEvent>((failedEvent) =>
             {
-                failedEvent.ValidationResult.AddToModelState(ModelState, null);
-                result = BadRequest(ModelState);
+                result = FromFailedValidationResult(failedEvent);
             });
 
             await _eventService.Subscribe<WatchNextSelectedEvent>((successEvent) =>
