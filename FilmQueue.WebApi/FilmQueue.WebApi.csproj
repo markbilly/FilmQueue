@@ -5,6 +5,11 @@
     <UserSecretsId>eeea3030-84d3-4bb0-bf5a-4ee2a0a1a1db</UserSecretsId>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>C:\Home\FilmQueue\FilmQueue.WebApi\FilmQueue.WebApi.xml</DocumentationFile>
+    <NoWarn>1701;1702;1591</NoWarn>
+  </PropertyGroup>
+
   <ItemGroup>
     <Folder Include="wwwroot\" />
   </ItemGroup>

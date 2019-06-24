@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>FilmQueue.WebApi</name>
+    </assembly>
+    <members>
+        <member name="M:FilmQueue.WebApi.Controllers.FilmsController.GetFilm(System.Int64)">
+            <summary>
+            Get a film you have saved
+            </summary>
+            <param name="id">ID for the film</param>
+            <returns></returns>
+        </member>
+        <member name="M:FilmQueue.WebApi.Controllers.FilmsController.UpdateFilm(System.Int64,FilmQueue.WebApi.Models.Requests.UpdateFilmRequest)">
+            <summary>
+            Edit a film you have saved
+            </summary>
+            <param name="id">ID for the film</param>
+            <param name="request">Updated properties for the film</param>
+            <returns></returns>
+        </member>
+        <member name="M:FilmQueue.WebApi.Controllers.FilmsController.SetFilmToWatched(System.Int64,FilmQueue.WebApi.Models.Requests.UpdateFilmWatchedRequest)">
+            <summary>
+            Update a film to indicate you have watched it
+            </summary>
+            <param name="id">ID for the film</param>
+            <param name="request"></param>
+            <returns></returns>
+        </member>
+        <member name="M:FilmQueue.WebApi.Controllers.FilmsController.CreateFilm(FilmQueue.WebApi.Models.Requests.CreateFilmRequest)">
+            <summary>
+            Save a film you want to watch
+            </summary>
+            <param name="request">Film properties</param>
+            <returns></returns>
+        </member>
+        <member name="M:FilmQueue.WebApi.Controllers.WatchlistController.GetWatchlist(System.Int32,System.Int32)">
+            <summary>
+            Get your watchlist
+            </summary>
+            <param name="page"></param>
+            <param name="pageSize"></param>
+            <returns></returns>
+        </member>
+        <member name="M:FilmQueue.WebApi.Controllers.WatchNextController.GetWatchNext">
+            <summary>
+            Get your watch next
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:FilmQueue.WebApi.Controllers.WatchNextController.ExpireWatchNext">
+            <summary>
+            Skip your watch next
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:FilmQueue.WebApi.Controllers.WatchNextController.SelectWatchNext(FilmQueue.WebApi.Models.Requests.SelectWatchNextRequest)">
+            <summary>
+            Select your watch next
+            </summary>
+            <param name="request"></param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

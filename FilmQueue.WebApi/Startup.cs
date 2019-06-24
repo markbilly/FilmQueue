@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using Autofac;
@@ -74,6 +75,8 @@ namespace FilmQueue.WebApi
                     }
                 });
                 options.OperationFilter<AuthorizeCheckOperationFilter>();
+                options.DescribeAllEnumsAsStrings();
+                options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "FilmQueue.WebApi.xml"));
             });
 
             services.AddDbContext<FilmQueueDbContext>(options =>
