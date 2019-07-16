@@ -40,9 +40,9 @@ export class AuthService {
 export function getClientSettings(): UserManagerSettings {
   return {
       authority: 'https://localhost:50505',
-      client_id: 'ng-file-queue',
+      client_id: 'ng-film-queue',
       redirect_uri: 'http://localhost:4200/auth-callback',   
       response_type:"id_token token",
-      scope:"openid profile email api.read"
+      scope:"openid profile email"
   };
 }
