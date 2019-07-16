@@ -25,6 +25,7 @@ namespace FilmQueue.IdentityServer
     {
         private static readonly string MVC_URL = "https://localhost:50504";
         private static readonly string API_URL = "https://localhost:50506";
+        private static readonly string SPA_URL = "http://localhost:4200";
 
         public Startup(IConfiguration configuration)
         {
@@ -80,7 +81,7 @@ namespace FilmQueue.IdentityServer
                     new Client
                     {
                         ClientId = "web",
-                        ClientName = "Film Queue Web App",
+                        ClientName = "Film Queue Web App (MVC)",
                         AllowedGrantTypes = GrantTypes.Implicit,
                         AllowedScopes = new[]
                         {
@@ -90,6 +91,23 @@ namespace FilmQueue.IdentityServer
                         },
                         RedirectUris = new[] { MVC_URL + "/signin-oidc" },
                         PostLogoutRedirectUris = new[] { MVC_URL }
+                    },
+                    new Client
+                    {
+                        ClientId = "ng-film-queue",
+                        ClientName = "Film Queue Web App (Angular)",
+                        AllowedGrantTypes = GrantTypes.Implicit,
+                        AllowedScopes = new[]
+                        {
+                            IdentityServerConstants.StandardScopes.OpenId,
+                            IdentityServerConstants.StandardScopes.Profile,
+                            IdentityServerConstants.StandardScopes.Email
+                        },
+                        RedirectUris = new[] { SPA_URL + "/auth-callback" },
+                        PostLogoutRedirectUris = new[] { SPA_URL },
+                        AllowedCorsOrigins = new[] { SPA_URL },
+                        AllowAccessTokensViaBrowser = true,
+                        AccessTokenLifetime = 3600
                     }
                 })
                 .AddInMemoryIdentityResources(new IdentityResource[]
@@ -115,7 +133,7 @@ namespace FilmQueue.IdentityServer
                 })
                 .AddAspNetIdentity<IdentityUser>()
                 .AddDeveloperSigningCredential();
-            
+
             services.AddMvc();
 
             services.AddSwaggerGen(options =>
