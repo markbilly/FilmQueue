@@ -26,6 +26,10 @@ export class AuthService {
     return this.userManager.signinRedirect();
   }
 
+  signout() {
+    this.userManager.signoutRedirect();
+  }
+
   async completeAuthentication() {
     this.user = await this.userManager.signinRedirectCallback();
     this._authNavStatusSource.next(this.isAuthenticated());      
