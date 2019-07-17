@@ -26,6 +26,10 @@ export class AuthService {
     return `${this.user.token_type} ${this.user.access_token}`;
   }
 
+  getUser() {
+    return this.userManager.getUser();
+  }
+
   login() {
     return this.userManager.signinRedirect();
   }
@@ -41,6 +45,10 @@ export class AuthService {
   
   isAuthenticated(): boolean {
     return this.user != null && !this.user.expired;
+  }
+
+  static isAuthenticated(user: User): boolean {
+    return user != null && !user.expired;
   }
 
 }

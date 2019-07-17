@@ -7,9 +7,9 @@ import { WatchNextComponent } from './watch-next/watch-next.component';
 
 
 const routes: Routes = [
-  { path: '', component: WatchNextComponent, canActivate: [AuthGuard] },
   { path: 'login', component: LoginComponent },
-  { path: 'auth-callback', component: AuthCallbackComponent }
+  { path: 'auth-callback', component: AuthCallbackComponent },
+  { path: '', component: WatchNextComponent, canActivate: [AuthGuard] }
 ];
 
 @NgModule({
