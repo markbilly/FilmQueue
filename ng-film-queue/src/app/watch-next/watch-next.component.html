@@ -1,1 +1,9 @@
-<p *ngIf="watchNext">You should watch <strong>{{watchNext.title}}</strong> next!</p>
+<div class="jumbotron" *ngIf="watchNext">
+    <h1 class="display-4">{{watchNext.title}}</h1>
+    <p class="lead">{{watchNext.runtime}}</p>
+    <hr class="my-4">
+    <p>Watch this film next!</p>
+</div>
+<div class="jumbotron" *ngElse>
+    <p>You have no films in your watchlist.</p>
+</div>
