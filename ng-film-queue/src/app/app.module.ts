@@ -8,6 +8,8 @@ import { CoreModule } from './core/core.module';
 import { AccountModule } from './account/account.module';
 import { HeaderComponent } from './header/header.component';
 import { WatchNextComponent } from './watch-next/watch-next.component';
+import { NgxSpinnerModule } from 'ngx-spinner';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 @NgModule({
   declarations: [
@@ -20,6 +22,8 @@ import { WatchNextComponent } from './watch-next/watch-next.component';
     BrowserModule,
     HttpClientModule,
     AppRoutingModule,
+    NgxSpinnerModule,
+    FontAwesomeModule,
     CoreModule,
     AccountModule
   ],

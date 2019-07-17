@@ -14,15 +14,26 @@ export class WatchNextService {
     this.token = authService.authorizationHeaderValue;
   }
 
-  getWatchNext() {
-    const httpOptions = {
+  get httpOptions() {
+    return {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
         'Authorization': this.token
       })
     };
+  };
 
-    return this.http.get(this.apiUrl + '/users/me/watchnext', httpOptions).pipe();
+  getWatchNext() {
+    return this.http.get(this.apiUrl + '/users/me/watchnext', this.httpOptions).toPromise();
+  }
+
+  // TODO: Move to a film service
+  setAsWatched(id: number) {
+    return this.http.put(this.apiUrl + "/users/me/films/" + id + "/watched", { watched: true }, this.httpOptions).toPromise();
+  }
+
+  selectWatchNext() {
+    return this.http.put(this.apiUrl + "/users/me/watchnext", { selectRandomFilm: true }, this.httpOptions).toPromise();
   }
 
 }

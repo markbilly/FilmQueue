@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { WatchNextService } from '../core/watch-next.service';
-import { Observable } from 'rxjs';
+import { NgxSpinnerService } from 'ngx-spinner';
+import { finalize } from 'rxjs/operators';
+import { faCheck, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-watch-next',
@@ -10,13 +12,52 @@ import { Observable } from 'rxjs';
 export class WatchNextComponent implements OnInit {
 
   watchNext = null;
+  
+  busyInit: boolean;
+  busyNext: boolean;
 
-  constructor(private watchNextService: WatchNextService) { }
+  faCheck = faCheck;
+  faChevronRight = faChevronRight;
+
+  constructor(private watchNextService: WatchNextService, private spinner: NgxSpinnerService) { }
 
   ngOnInit() {
-    this.watchNextService.getWatchNext().subscribe(result => {
-      this.watchNext = result;
-    });
+    this.busyInit = true;
+    this.spinner.show();
+    this.getCurrent();
+  }
+
+  next() {
+    this.busyNext = true;
+    this.watchNextService.setAsWatched(this.watchNext.id)
+      .then(() => {
+        return this.watchNextService.selectWatchNext();
+      })
+      .then(result => {
+        this.watchNext = result;
+      })
+      .catch(() => {
+        this.getCurrent();
+      })
+      .finally(() => {
+        this.busyNext = false;
+      });
+  }
+
+  private getCurrent() {
+    this.watchNextService.getWatchNext()
+      .then(result => {
+        this.watchNext = result;
+      })
+      .catch(error => {
+        if (error.status === 404) {
+          this.watchNext = null;
+        }
+      })
+      .finally(() => {
+        this.spinner.hide();
+        this.busyInit = false;
+      });
   }
 
 }
