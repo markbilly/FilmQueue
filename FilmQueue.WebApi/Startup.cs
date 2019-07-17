@@ -30,6 +30,8 @@ namespace FilmQueue.WebApi
     public class Startup
     {
         private static readonly string IDSERVER_URL = "https://localhost:50505";
+        private static readonly string MVC_URL = "https://localhost:50504";
+        private static readonly string SPA_URL = "http://localhost:4200";
 
         public Startup(IConfiguration configuration)
         {
@@ -41,6 +43,8 @@ namespace FilmQueue.WebApi
 
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
+            services.AddCors();
+
             services.AddMemoryCache();
 
             services
@@ -126,6 +130,14 @@ namespace FilmQueue.WebApi
             };
 
             app.UseMiddleware<ErrorHandlingMiddleware>();
+
+            app.UseCors(options =>
+            {
+                options.WithOrigins(MVC_URL, SPA_URL)
+                    .AllowAnyMethod()
+                    .AllowCredentials()
+                    .AllowAnyHeader();
+            });
 
             app.UseAuthentication();
             app.UseMvc();

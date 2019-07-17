@@ -22,6 +22,10 @@ export class AuthService {
     });
   }
 
+  get authorizationHeaderValue(): string {
+    return `${this.user.token_type} ${this.user.access_token}`;
+  }
+
   login() {
     return this.userManager.signinRedirect();
   }
@@ -47,6 +51,6 @@ export function getClientSettings(): UserManagerSettings {
       client_id: 'ng-film-queue',
       redirect_uri: 'http://localhost:4200/auth-callback',   
       response_type:"id_token token",
-      scope:"openid profile email"
+      scope:"openid profile email api.all"
   };
 }

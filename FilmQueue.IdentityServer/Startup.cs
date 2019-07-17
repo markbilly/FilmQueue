@@ -87,7 +87,8 @@ namespace FilmQueue.IdentityServer
                         {
                             IdentityServerConstants.StandardScopes.OpenId,
                             IdentityServerConstants.StandardScopes.Profile,
-                            IdentityServerConstants.StandardScopes.Email
+                            IdentityServerConstants.StandardScopes.Email,
+                            "api.all"
                         },
                         RedirectUris = new[] { MVC_URL + "/signin-oidc" },
                         PostLogoutRedirectUris = new[] { MVC_URL }
@@ -101,7 +102,8 @@ namespace FilmQueue.IdentityServer
                         {
                             IdentityServerConstants.StandardScopes.OpenId,
                             IdentityServerConstants.StandardScopes.Profile,
-                            IdentityServerConstants.StandardScopes.Email
+                            IdentityServerConstants.StandardScopes.Email,
+                            "api.all"
                         },
                         RedirectUris = new[] { SPA_URL + "/auth-callback" },
                         PostLogoutRedirectUris = new[] { SPA_URL },
