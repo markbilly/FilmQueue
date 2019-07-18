@@ -11,6 +11,9 @@ import { WatchNextComponent } from './watch-next/watch-next.component';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { WatchlistComponent } from './watchlist/watchlist.component';
+import { AddFilmComponent } from './add-film/add-film.component';
+import { FooterComponent } from './footer/footer.component';
+import { ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -18,12 +21,15 @@ import { WatchlistComponent } from './watchlist/watchlist.component';
     AuthCallbackComponent,
     HeaderComponent,
     WatchNextComponent,
-    WatchlistComponent
+    WatchlistComponent,
+    AddFilmComponent,
+    FooterComponent
   ],
   imports: [
     BrowserModule,
     HttpClientModule,
     AppRoutingModule,
+    ReactiveFormsModule,
     NgxSpinnerModule,
     FontAwesomeModule,
     CoreModule,

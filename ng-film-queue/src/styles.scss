@@ -1,1 +1,16 @@
 /* You can add global styles to this file, and also import other style files */
+a.link-unstyled {
+    color: inherit;
+    text-decoration: none !important;
+    font-weight: inherit;
+
+    &:hover,
+    &:focus,
+    &:focus-within,
+    &:visited,
+    &.active {
+        color: inherit;
+        text-decoration: none !important;
+        font-weight: inherit;
+    }
+}

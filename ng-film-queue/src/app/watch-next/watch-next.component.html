@@ -8,16 +8,16 @@
             <div *ngIf="watchNext">
                 <h5 class="card-title">{{watchNext.title}}</h5>
                 <p class="card-text">{{watchNext.runtime}}</p>
-                <a href="#" (click)="next()" class="btn btn-primary">
+                <a [routerLink]="" (click)="next()" class="btn btn-primary">
                     <!-- TODO: spinner-button component -->
                     <fa-icon [icon]="faCheck" class="mr-2"></fa-icon>I have watched this
                 </a>
+                <a [routerLink]="" (click)="skip()" class="btn btn-secondary btn-sm mt-2">Skip this suggestion</a>
             </div>
         </div>
     </div>
     <div *ngIf="!watchNext" class="card-body">
         <p class="card-text">You have no films in your watchlist.</p>
-        <a [routerLink]="['/watchlist']" class="btn btn-secondary">Manage watchlist<fa-icon [icon]="faChevronRight" class="ml-2"></fa-icon></a>
     </div>
 </div>
 <ngx-spinner></ngx-spinner>

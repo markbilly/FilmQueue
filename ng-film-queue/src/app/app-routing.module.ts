@@ -5,6 +5,7 @@ import { AuthGuard } from './core/auth/auth.guard';
 import { LoginComponent } from './account/login/login.component';
 import { WatchNextComponent } from './watch-next/watch-next.component';
 import { WatchlistComponent } from './watchlist/watchlist.component';
+import { AddFilmComponent } from './add-film/add-film.component';
 
 
 const routes: Routes = [
@@ -12,6 +13,7 @@ const routes: Routes = [
   { path: 'auth-callback', component: AuthCallbackComponent },
   // Protected routes
   { canActivate: [AuthGuard], path: 'watchlist', component: WatchlistComponent },
+  { canActivate: [AuthGuard], path: 'add-film', component: AddFilmComponent },
   { canActivate: [AuthGuard], path: '', component: WatchNextComponent }
 ];
 
