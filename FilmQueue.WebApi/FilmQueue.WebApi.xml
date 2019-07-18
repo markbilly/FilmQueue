@@ -11,6 +11,14 @@
             <param name="id">ID for the film</param>
             <returns></returns>
         </member>
+        <member name="M:FilmQueue.WebApi.Controllers.FilmsController.GetWatchedFilms(System.Int32,System.Int32)">
+            <summary>
+            Get films that have been watched
+            </summary>
+            <param name="page"></param>
+            <param name="pageSize"></param>
+            <returns></returns>
+        </member>
         <member name="M:FilmQueue.WebApi.Controllers.FilmsController.UpdateFilm(System.Int64,FilmQueue.WebApi.Models.Requests.UpdateFilmRequest)">
             <summary>
             Edit a film you have saved

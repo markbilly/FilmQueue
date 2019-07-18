@@ -1,4 +1,4 @@
-<div class="card mt-4" *ngIf="!busyInit">
+<div class="card" *ngIf="!busyInit">
     <div class="card-header">
         Watch Next
     </div>
@@ -9,6 +9,7 @@
                 <h5 class="card-title">{{watchNext.title}}</h5>
                 <p class="card-text">{{watchNext.runtime}}</p>
                 <a href="#" (click)="next()" class="btn btn-primary">
+                    <!-- TODO: spinner-button component -->
                     <fa-icon [icon]="faCheck" class="mr-2"></fa-icon>I have watched this
                 </a>
             </div>
@@ -16,8 +17,7 @@
     </div>
     <div *ngIf="!watchNext" class="card-body">
         <p class="card-text">You have no films in your watchlist.</p>
-        <!-- TODO: spinner-button component -->
-        <a href="#" class="btn btn-secondary">Manage watchlist<fa-icon [icon]="faChevronRight" class="ml-2"></fa-icon></a>
+        <a [routerLink]="['/watchlist']" class="btn btn-secondary">Manage watchlist<fa-icon [icon]="faChevronRight" class="ml-2"></fa-icon></a>
     </div>
 </div>
 <ngx-spinner></ngx-spinner>

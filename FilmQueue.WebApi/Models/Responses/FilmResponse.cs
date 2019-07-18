@@ -12,6 +12,7 @@ namespace FilmQueue.WebApi.Models.Responses
         public long Id { get; set; }
         public string Title { get; private set; }
         public string Runtime { get; private set; }
+        public bool Watched { get; private set; }
 
         public static FilmResponse FromDomainModel(Film watchlistItem)
         {
@@ -19,7 +20,8 @@ namespace FilmQueue.WebApi.Models.Responses
             {
                 Id = watchlistItem.Id,
                 Title = watchlistItem.Title,
-                Runtime = watchlistItem.RuntimeInMinutes + " minutes"
+                Runtime = watchlistItem.RuntimeInMinutes + " minutes",
+                Watched = watchlistItem.Watched
             };
         }
 
@@ -29,7 +31,8 @@ namespace FilmQueue.WebApi.Models.Responses
             {
                 Id = record.Id,
                 Title = record.Title,
-                Runtime = record.RuntimeInMinutes + " minutes"
+                Runtime = record.RuntimeInMinutes + " minutes",
+                Watched = record.WatchedDateTime.HasValue
             };
         }
     }

@@ -14,19 +14,16 @@ namespace FilmQueue.WebApi.DataAccess
         Task<FilmRecord> GetFilmById(long filmId);
         Task<FilmRecord> GetRandomUnwatchedFilm(string userId);
         Task<int> GetUnwatchedFilmCount(string userId);
+        Task<IEnumerable<FilmRecord>> GetWatched(string userId, int take, int skip);
     }
 
     public class FilmReader : IFilmReader
     {
         private readonly FilmQueueDbContext _dbContext;
-        private readonly IMemoryCache _memoryCache;
 
-        public FilmReader(
-            FilmQueueDbContext dbContext,
-            IMemoryCache memoryCache)
+        public FilmReader(FilmQueueDbContext dbContext)
         {
             _dbContext = dbContext;
-            _memoryCache = memoryCache;
         }
 
         public Task<FilmRecord> GetFilmById(long filmId)
@@ -41,6 +38,16 @@ namespace FilmQueue.WebApi.DataAccess
             var randomItem = await unwatchedItems.Skip(new Random().Next(count)).FirstOrDefaultAsync();
 
             return randomItem;
+        }
+
+        public async Task<IEnumerable<FilmRecord>> GetWatched(string userId, int take, int skip)
+        {
+            return await _dbContext.FilmRecords
+                .Where(x => x.OwnedByUserId == userId && x.WatchedDateTime.HasValue)
+                .OrderByDescending(x => x.WatchedDateTime.Value)
+                .Skip(skip)
+                .Take(take)
+                .ToListAsync();
         }
 
         public async Task<int> GetUnwatchedFilmCount(string userId)

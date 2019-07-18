@@ -10,13 +10,15 @@ import { HeaderComponent } from './header/header.component';
 import { WatchNextComponent } from './watch-next/watch-next.component';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { WatchlistComponent } from './watchlist/watchlist.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     AuthCallbackComponent,
     HeaderComponent,
-    WatchNextComponent
+    WatchNextComponent,
+    WatchlistComponent
   ],
   imports: [
     BrowserModule,

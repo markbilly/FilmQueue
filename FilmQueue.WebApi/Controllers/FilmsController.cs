@@ -19,7 +19,7 @@ using FilmQueue.WebApi.Infrastructure.FluentValidation;
 namespace FilmQueue.WebApi.Controllers
 {
     [Authorize]
-    [Route("users/me/films")]
+    [Route("users/me")]
     public class FilmsController : ApiController
     {
         private readonly ICurrentUserAccessor _currentUserAccessor;
@@ -41,7 +41,7 @@ namespace FilmQueue.WebApi.Controllers
         /// </summary>
         /// <param name="id">ID for the film</param>
         /// <returns></returns>
-        [HttpGet("{id}")]
+        [HttpGet("films/{id}")]
         [ProducesResponseType(typeof(FilmResponse), 200)]
         public async Task<IActionResult> GetFilm([FromRoute] long id)
         {
@@ -56,12 +56,27 @@ namespace FilmQueue.WebApi.Controllers
         }
 
         /// <summary>
+        /// Get films that have been watched
+        /// </summary>
+        /// <param name="page"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
+        [HttpGet("watchedfilms")]
+        [ProducesResponseType(typeof(QueryResponse<FilmResponse>), 200)]
+        public async Task<IActionResult> GetWatchedFilms(int page = 1, int pageSize = 5)
+        {
+            var records = await _filmReader.GetWatched(_currentUserAccessor.CurrentUser.Id, pageSize, (page - 1) * pageSize);
+
+            return Ok(QueryResponse<FilmResponse>.FromEnumerable(records, record => FilmResponse.FromRecord(record)));
+        }
+
+        /// <summary>
         /// Edit a film you have saved
         /// </summary>
         /// <param name="id">ID for the film</param>
         /// <param name="request">Updated properties for the film</param>
         /// <returns></returns>
-        [HttpPut("{id}")]
+        [HttpPut("films/{id}")]
         [ProducesResponseType(typeof(FilmResponse), 200)]
         public async Task<IActionResult> UpdateFilm([FromRoute] long id, [FromBody] UpdateFilmRequest request)
         {
@@ -94,7 +109,7 @@ namespace FilmQueue.WebApi.Controllers
         /// <param name="id">ID for the film</param>
         /// <param name="request"></param>
         /// <returns></returns>
-        [HttpPut("{id}/watched")]
+        [HttpPut("films/{id}/watched")]
         [ProducesResponseType(typeof(bool), 200)]
         public async Task<IActionResult> SetFilmToWatched([FromRoute] long id, [FromBody] UpdateFilmWatchedRequest request)
         {
@@ -119,7 +134,7 @@ namespace FilmQueue.WebApi.Controllers
         /// </summary>
         /// <param name="request">Film properties</param>
         /// <returns></returns>
-        [HttpPost]
+        [HttpPost("films")]
         [ProducesResponseType(typeof(FilmResponse), 201)]
         public async Task<IActionResult> CreateFilm([FromBody] CreateFilmRequest request)
         {

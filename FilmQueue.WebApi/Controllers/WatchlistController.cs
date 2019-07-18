@@ -38,7 +38,7 @@ namespace FilmQueue.WebApi.Controllers
         /// <param name="pageSize"></param>
         /// <returns></returns>
         [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<QueryResponse<FilmResponse>>), 200)]
+        [ProducesResponseType(typeof(QueryResponse<FilmResponse>), 200)]
         public async Task<IActionResult> GetWatchlist(int page = 1, int pageSize = 5)
         {
             var records = await _watchlistReader.GetWatchlist(_currentUserAccessor.CurrentUser.Id, pageSize, (page - 1) * pageSize);

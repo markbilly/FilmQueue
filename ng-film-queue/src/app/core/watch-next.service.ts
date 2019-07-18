@@ -27,13 +27,21 @@ export class WatchNextService {
     return this.http.get(this.apiUrl + '/users/me/watchnext', this.httpOptions).toPromise();
   }
 
+  selectWatchNext() {
+    return this.http.put(this.apiUrl + "/users/me/watchnext", { selectRandomFilm: true }, this.httpOptions).toPromise();
+  }
+
   // TODO: Move to a film service
   setAsWatched(id: number) {
     return this.http.put(this.apiUrl + "/users/me/films/" + id + "/watched", { watched: true }, this.httpOptions).toPromise();
   }
 
-  selectWatchNext() {
-    return this.http.put(this.apiUrl + "/users/me/watchnext", { selectRandomFilm: true }, this.httpOptions).toPromise();
+  getWatchlist() {
+    return this.http.get(this.apiUrl + "/users/me/watchlist/?page=1&pageSize=100", this.httpOptions).toPromise();
+  }
+
+  getWatched() {
+    return this.http.get(this.apiUrl + "/users/me/watchedfilms/?page=1&pageSize=100", this.httpOptions).toPromise();
   }
 
 }
