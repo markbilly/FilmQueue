@@ -29,10 +29,6 @@ namespace FilmQueue.WebApi
 {
     public class Startup
     {
-        private static readonly string IDSERVER_URL = "https://localhost:50505";
-        private static readonly string MVC_URL = "https://localhost:50504";
-        private static readonly string SPA_URL = "http://localhost:4200";
-
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -62,7 +58,7 @@ namespace FilmQueue.WebApi
             services.AddAuthentication(IdentityServerAuthenticationDefaults.AuthenticationScheme)
                 .AddIdentityServerAuthentication(options =>
                 {
-                    options.Authority = IDSERVER_URL;
+                    options.Authority = Configuration["Url.IdSrv"];
                     options.ApiName = "api";
                 });
 
@@ -72,7 +68,7 @@ namespace FilmQueue.WebApi
                 options.AddSecurityDefinition("oauth2", new OAuth2Scheme
                 {
                     Flow = "implicit",
-                    AuthorizationUrl = IDSERVER_URL + "/connect/authorize",
+                    AuthorizationUrl = Configuration["Url.IdSrv"] + "/connect/authorize",
                     Scopes = new Dictionary<string, string>
                     {
                         { "api.all", "Film Queue Web API - full access" }
@@ -85,7 +81,7 @@ namespace FilmQueue.WebApi
 
             services.AddDbContext<FilmQueueDbContext>(options =>
             {
-                options.UseSqlServer(Configuration["ConnectionString"]);
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
             });
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
@@ -133,7 +129,7 @@ namespace FilmQueue.WebApi
 
             app.UseCors(options =>
             {
-                options.WithOrigins(MVC_URL, SPA_URL)
+                options.WithOrigins(Configuration["Url.Mvc"], Configuration["Url.Spa"])
                     .AllowAnyMethod()
                     .AllowCredentials()
                     .AllowAnyHeader();

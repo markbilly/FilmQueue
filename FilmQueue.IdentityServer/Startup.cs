@@ -23,10 +23,6 @@ namespace FilmQueue.IdentityServer
 {
     public class Startup
     {
-        private static readonly string MVC_URL = "https://localhost:50504";
-        private static readonly string API_URL = "https://localhost:50506";
-        private static readonly string SPA_URL = "http://localhost:4200";
-
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -40,7 +36,7 @@ namespace FilmQueue.IdentityServer
 
             services.AddDbContext<ApplicationDbContext>(builder =>
             {
-                builder.UseSqlServer(Configuration["ConnectionString"], sqlOptions =>
+                builder.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"), sqlOptions =>
                 {
                     sqlOptions.MigrationsAssembly(migrationsAssembly);
                 });
@@ -53,7 +49,7 @@ namespace FilmQueue.IdentityServer
                 {
                     options.ConfigureDbContext = (builder) =>
                     {
-                        builder.UseSqlServer(Configuration["ConnectionString"], sqlOptions =>
+                        builder.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"), sqlOptions =>
                         {
                             sqlOptions.MigrationsAssembly(migrationsAssembly);
                         });
@@ -75,7 +71,7 @@ namespace FilmQueue.IdentityServer
                         ClientName = "Film Queue Web API - Swagger UI",
                         AllowedGrantTypes = GrantTypes.Implicit,
                         AllowAccessTokensViaBrowser = true,
-                        RedirectUris = new[] { API_URL + "/swagger/oauth2-redirect.html" },
+                        RedirectUris = new[] { Configuration["Url.Api"] + "/swagger/oauth2-redirect.html" },
                         AllowedScopes = { "api.all" }
                     },
                     new Client
@@ -90,8 +86,8 @@ namespace FilmQueue.IdentityServer
                             IdentityServerConstants.StandardScopes.Email,
                             "api.all"
                         },
-                        RedirectUris = new[] { MVC_URL + "/signin-oidc" },
-                        PostLogoutRedirectUris = new[] { MVC_URL }
+                        RedirectUris = new[] { Configuration["Url.Mvc"] + "/signin-oidc" },
+                        PostLogoutRedirectUris = new[] { Configuration["Url.Mvc"] }
                     },
                     new Client
                     {
@@ -105,9 +101,9 @@ namespace FilmQueue.IdentityServer
                             IdentityServerConstants.StandardScopes.Email,
                             "api.all"
                         },
-                        RedirectUris = new[] { SPA_URL + "/auth-callback" },
-                        PostLogoutRedirectUris = new[] { SPA_URL },
-                        AllowedCorsOrigins = new[] { SPA_URL },
+                        RedirectUris = new[] { Configuration["Url.Spa"] + "/auth-callback" },
+                        PostLogoutRedirectUris = new[] { Configuration["Url.Spa"] },
+                        AllowedCorsOrigins = new[] { Configuration["Url.Spa"] },
                         AllowAccessTokensViaBrowser = true,
                         AccessTokenLifetime = 3600
                     }
