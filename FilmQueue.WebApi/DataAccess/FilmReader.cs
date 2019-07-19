@@ -12,8 +12,9 @@ namespace FilmQueue.WebApi.DataAccess
     public interface IFilmReader : IDependency
     {
         Task<FilmRecord> GetFilmById(long filmId);
-        Task<FilmRecord> GetRandomUnwatchedFilm(string userId);
+        Task<FilmRecord> GetRandomUnwatchedFilm(string userId, long? excludeFilmId = null);
         Task<int> GetUnwatchedFilmCount(string userId);
+        Task<int> GetWatchedFilmCount(string userId);
         Task<IEnumerable<FilmRecord>> GetWatched(string userId, int take, int skip);
     }
 
@@ -31,9 +32,15 @@ namespace FilmQueue.WebApi.DataAccess
             return _dbContext.FilmRecords.FirstOrDefaultAsync(item => item.Id == filmId);
         }
 
-        public async Task<FilmRecord> GetRandomUnwatchedFilm(string userId)
+        public async Task<FilmRecord> GetRandomUnwatchedFilm(string userId, long? excludeFilmId = null)
         {
             var unwatchedItems = GetUnwatchedItems(userId);
+
+            if (excludeFilmId.HasValue)
+            {
+                unwatchedItems = unwatchedItems.Where(x => x.Id != excludeFilmId);
+            }
+
             var count = await unwatchedItems.CountAsync();
             var randomItem = await unwatchedItems.Skip(new Random().Next(count)).FirstOrDefaultAsync();
 
@@ -60,6 +67,13 @@ namespace FilmQueue.WebApi.DataAccess
         {
             return _dbContext.FilmRecords
                 .Where(item => item.OwnedByUserId == userId && !item.WatchedDateTime.HasValue);
+        }
+
+        public Task<int> GetWatchedFilmCount(string userId)
+        {
+            return _dbContext.FilmRecords
+                .Where(item => item.OwnedByUserId == userId && item.WatchedDateTime.HasValue)
+                .CountAsync();
         }
     }
 }

@@ -12,6 +12,7 @@ namespace FilmQueue.WebApi.DataAccess
     public interface IWatchNextReader : IDependency
     {
         Task<FilmRecord> GetActiveWatchNext(string userId);
+        Task<FilmRecord> GetMostRecentWatchNext(string userId);
         Task<bool> IsFilmWatchNextSelection(long filmId);
     }
 
@@ -45,6 +46,16 @@ namespace FilmQueue.WebApi.DataAccess
                     .Where(item => item.Id == selectionRecord.FilmId)
                     .SingleOrDefaultAsync();
             });
+        }
+
+        public async Task<FilmRecord> GetMostRecentWatchNext(string userId)
+        {
+            var selectionRecord = await _dbContext.WatchNextSelectionRecords
+                .Where(x => x.UserId == userId && x.ExpiredDateTime.HasValue)
+                .OrderByDescending(x => x.ExpiredDateTime.Value)
+                .FirstOrDefaultAsync();
+
+            return await _dbContext.FilmRecords.SingleOrDefaultAsync(x => x.Id == selectionRecord.FilmId);
         }
 
         public Task<bool> IsFilmWatchNextSelection(long filmId)

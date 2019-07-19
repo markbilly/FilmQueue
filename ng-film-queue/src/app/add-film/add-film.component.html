@@ -1,4 +1,4 @@
-<form class="form" [formGroup]="filmForm" (ngSubmit)="submit()">
+<form class="form mb-4" [formGroup]="filmForm" (ngSubmit)="submit()">
     <div class="form-group">
         <label class="sr-only" for="title">Title</label>
         <input type="text" formControlName="title" class="form-control mb-2 mr-sm-2" id="title" placeholder="Film title">
@@ -8,8 +8,7 @@
         <input type="number" formControlName="runtimeInMinutes" class="form-control" id="runtime" placeholder="Runtime (minutes)">
     </div>
 
-    <div class="d-flex justify-content-between">
-        <button type="button" class="btn btn-secondary" (click)="location.back()">Cancel</button>
+    <div class="text-right">
         <button type="submit" class="btn btn-primary" [disabled]="!filmForm.valid">Add to watchlist</button>
     </div>
 </form>

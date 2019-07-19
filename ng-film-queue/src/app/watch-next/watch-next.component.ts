@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { WatchNextService } from '../core/watch-next.service';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { faCheck } from '@fortawesome/free-solid-svg-icons';
+import * as _ from "lodash";
 
 @Component({
   selector: 'app-watch-next',
@@ -11,10 +12,9 @@ import { faCheck } from '@fortawesome/free-solid-svg-icons';
 export class WatchNextComponent implements OnInit {
 
   watchNext = null;
+  hasUnwatchedFilms: boolean;
 
   busyInit: boolean;
-  busyNext: boolean;
-  busySkip: boolean;
 
   faCheck = faCheck;
 
@@ -24,7 +24,11 @@ export class WatchNextComponent implements OnInit {
     this.busyInit = true;
     this.spinner.show();
 
-    this.watchNextService.getWatchNext()
+    this.watchNextService.getWatchlist()
+      .then((watchlist: any) => {
+        this.hasUnwatchedFilms = _.isFinite(watchlist.totalItems) && watchlist.totalItems > 1;
+        return this.watchNextService.getWatchNext();
+      })    
       .then(watchNext => {
         this.watchNext = watchNext;
       })

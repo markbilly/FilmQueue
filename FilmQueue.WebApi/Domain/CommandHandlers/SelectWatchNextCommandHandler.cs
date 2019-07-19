@@ -21,17 +21,20 @@ namespace FilmQueue.WebApi.Domain.CommandHandlers
         private readonly IFilmReader _filmReader;
         private readonly IValidator<SelectWatchNextCommand> _validator;
         private readonly IEventService _eventService;
+        private readonly IWatchNextReader _watchNextReader;
 
         public SelectWatchNextCommandHandler(
             IWatchNextWriter watchNextWriter,
             IFilmReader filmReader,
             IValidator<SelectWatchNextCommand> validator,
-            IEventService eventService)
+            IEventService eventService,
+            IWatchNextReader watchNextReader)
         {
             _watchNextWriter = watchNextWriter;
             _filmReader = filmReader;
             _validator = validator;
             _eventService = eventService;
+            _watchNextReader = watchNextReader;
         }
 
         public async Task Handle(SelectWatchNextCommand command)
@@ -43,9 +46,16 @@ namespace FilmQueue.WebApi.Domain.CommandHandlers
                 return;
             }
 
-            var filmRecord = command.FilmId.HasValue
-                ? await _filmReader.GetFilmById(command.FilmId.Value)
-                : await _filmReader.GetRandomUnwatchedFilm(command.UserId);
+            FilmRecord filmRecord;
+            if (command.FilmId.HasValue)
+            {
+                filmRecord = await _filmReader.GetFilmById(command.FilmId.Value);
+            }
+            else
+            {
+                var mostRecentWatchNext = await _watchNextReader.GetMostRecentWatchNext(command.UserId);
+                filmRecord = await _filmReader.GetRandomUnwatchedFilm(command.UserId, mostRecentWatchNext?.Id);
+            }
 
             await _watchNextWriter.MakeSelection(filmRecord.Id, filmRecord.OwnedByUserId);
 

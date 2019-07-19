@@ -62,12 +62,13 @@ namespace FilmQueue.WebApi.Controllers
         /// <param name="pageSize"></param>
         /// <returns></returns>
         [HttpGet("watchedfilms")]
-        [ProducesResponseType(typeof(QueryResponse<FilmResponse>), 200)]
+        [ProducesResponseType(typeof(PagedResponse<FilmResponse>), 200)]
         public async Task<IActionResult> GetWatchedFilms(int page = 1, int pageSize = 5)
         {
+            var count = await _filmReader.GetWatchedFilmCount(_currentUserAccessor.CurrentUser.Id);
             var records = await _filmReader.GetWatched(_currentUserAccessor.CurrentUser.Id, pageSize, (page - 1) * pageSize);
 
-            return Ok(QueryResponse<FilmResponse>.FromEnumerable(records, record => FilmResponse.FromRecord(record)));
+            return Ok(PagedResponse<FilmResponse>.FromEnumerable(records, record => FilmResponse.FromRecord(record), page, pageSize, count));
         }
 
         /// <summary>

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-footer',
@@ -10,11 +11,27 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 export class FooterComponent implements OnInit {
 
   faPlus = faPlus;
+  isVisible: boolean;
 
-  constructor(private router: Router) { }
+  constructor(router: Router) {
+    router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        this.isVisible = this.determineIsVisible(event.url);
+      }
+    });
+  }
 
-  get isVisible() {
-    return !['/add-film', '/login'].includes(this.router.url.toLowerCase())
+  determineIsVisible(url: string) {
+    let result: boolean = true;
+    url = url.toLowerCase();
+
+    _.forEach(['/watchlist', '/login'], path => {
+      if (_.includes(url, path)) {
+        result = false;
+      }
+    });
+
+    return result;
   }
 
   ngOnInit() {

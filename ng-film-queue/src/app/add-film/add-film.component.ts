@@ -1,8 +1,6 @@
-import { Component, OnInit } from '@angular/core';
-import { Location } from '@angular/common';
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { WatchNextService } from '../core/watch-next.service';
-import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-add-film',
@@ -16,8 +14,9 @@ export class AddFilmComponent implements OnInit {
     runtimeInMinutes: ['', Validators.required]
   });
 
+  @Output() filmAdded: EventEmitter<any> = new EventEmitter();
+
   constructor(
-    private location: Location,
     private formBuilder: FormBuilder,
     private watchNextService: WatchNextService) { }
 
@@ -28,7 +27,8 @@ export class AddFilmComponent implements OnInit {
     if (this.filmForm.valid) {
       this.watchNextService.addFilm(this.filmForm.value)
         .then(() => {
-          this.location.back();
+          this.filmForm.reset();
+          this.filmAdded.emit(null);
         });
     }
   }
