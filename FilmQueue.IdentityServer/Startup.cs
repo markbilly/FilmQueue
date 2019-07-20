@@ -76,21 +76,6 @@ namespace FilmQueue.IdentityServer
                     },
                     new Client
                     {
-                        ClientId = "web",
-                        ClientName = "Film Queue Web App (MVC)",
-                        AllowedGrantTypes = GrantTypes.Implicit,
-                        AllowedScopes = new[]
-                        {
-                            IdentityServerConstants.StandardScopes.OpenId,
-                            IdentityServerConstants.StandardScopes.Profile,
-                            IdentityServerConstants.StandardScopes.Email,
-                            "api.all"
-                        },
-                        RedirectUris = new[] { Configuration["Url.Mvc"] + "/signin-oidc" },
-                        PostLogoutRedirectUris = new[] { Configuration["Url.Mvc"] }
-                    },
-                    new Client
-                    {
                         ClientId = "ng-film-queue",
                         ClientName = "Film Queue Web App (Angular)",
                         AllowedGrantTypes = GrantTypes.Implicit,
