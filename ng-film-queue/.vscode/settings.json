@@ -1,0 +1,7 @@
+{
+    "appService.zipIgnorePattern": [
+        ".vscode{,/**}"
+    ],
+    "appService.defaultWebAppToDeploy": "/subscriptions/6444b6c5-116c-4e16-ab47-2c56830ee50b/resourceGroups/FilmQueue-Linux/providers/Microsoft.Web/sites/FilmQueue",
+    "appService.deploySubpath": "dist\\ng-film-queue"
+}

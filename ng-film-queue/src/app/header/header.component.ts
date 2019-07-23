@@ -18,7 +18,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   mode: "page" | "modal";
   faTimes = faTimes;
 
-  constructor(private authService: AuthService, private location: Location, router: Router) {
+  constructor(private authService: AuthService, public location: Location, router: Router) {
     router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         this.mode = this.determineMode(event.url);
