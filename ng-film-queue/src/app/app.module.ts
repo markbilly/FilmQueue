@@ -3,27 +3,34 @@ import { NgModule } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { AuthCallbackComponent } from './auth-callback/auth-callback.component';
+import { AuthCallbackComponent } from './pages/auth-callback/auth-callback.component';
 import { CoreModule } from './core/core.module';
-import { AccountModule } from './account/account.module';
-import { HeaderComponent } from './header/header.component';
-import { WatchNextComponent } from './watch-next/watch-next.component';
+import { WatchNextComponent } from './components/watch-next/watch-next.component';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { WatchlistComponent } from './watchlist/watchlist.component';
-import { AddFilmComponent } from './add-film/add-film.component';
-import { FooterComponent } from './footer/footer.component';
+import { WatchlistComponent } from './components/watchlist/watchlist.component';
+import { AddFilmComponent } from './pages/add-film/add-film.component';
+import { FooterComponent } from './components/footer/footer.component';
 import { ReactiveFormsModule } from '@angular/forms';
+import { HomeComponent } from './pages/home/home.component';
+import { AddFilmFormComponent } from './components/add-film-form/add-film-form.component';
+import { LoginComponent } from './pages/login/login.component';
+import { PageShellComponent } from './components/page-shell/page-shell.component';
+import { ModalShellComponent } from './components/modal-shell/modal-shell.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     AuthCallbackComponent,
-    HeaderComponent,
     WatchNextComponent,
     WatchlistComponent,
     AddFilmComponent,
-    FooterComponent
+    FooterComponent,
+    HomeComponent,
+    AddFilmFormComponent,
+    LoginComponent,
+    PageShellComponent,
+    ModalShellComponent
   ],
   imports: [
     BrowserModule,
@@ -32,8 +39,7 @@ import { ReactiveFormsModule } from '@angular/forms';
     ReactiveFormsModule,
     NgxSpinnerModule,
     FontAwesomeModule,
-    CoreModule,
-    AccountModule
+    CoreModule
   ],
   providers: [],
   bootstrap: [AppComponent]
