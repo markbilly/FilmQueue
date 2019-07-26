@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { faCheck } from '@fortawesome/free-solid-svg-icons';
+import { faCheck, faEdit, faPencilAlt } from '@fortawesome/free-solid-svg-icons';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { WatchNextService } from '../../core/services/watch-next.service';
 
@@ -11,12 +11,14 @@ import { WatchNextService } from '../../core/services/watch-next.service';
 export class WatchlistComponent implements OnInit {
 
   busyInit: boolean;
+  showWatched = false;
 
   faCheck = faCheck;
-  showWatched = false;
+  faEdit = faEdit;
 
   toWatch = [];
   watched = [];
+  watchNextId = null;
 
   constructor(private watchNextService: WatchNextService, private spinner: NgxSpinnerService) { }
 
@@ -32,6 +34,10 @@ export class WatchlistComponent implements OnInit {
         this.busyInit = false;
         this.spinner.hide();
       });
+  }
+
+  setWatchNext(watchNext) {
+    this.watchNextId = watchNext.id;
   }
 
   toggleWatched() {

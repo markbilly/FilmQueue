@@ -2,8 +2,8 @@
     <div class="navbar navbar-dark bg-dark box-shadow px-0">
         <div class="container">
             <div class="d-flex justify-content-between w-100">
-                <a (click)="location.back()" class="link-unstyled cursor-pointer px-2">
-                    <span aria-hidden="true" class="back">&times;</span>
+                <a (click)="dismissed.emit(null)" class="link-unstyled cursor-pointer px-2">
+                    <span aria-hidden="true" class="dismiss">&times;</span>
                 </a>
                 <a (click)="accepted.emit(null)" class="link-unstyled cursor-pointer px-2">
                     <fa-icon [icon]="faCheck" class="text-white" style="font-size: 1.5rem"></fa-icon>

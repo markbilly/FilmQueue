@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { WatchNextService } from '../../core/services/watch-next.service';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { faCheck } from '@fortawesome/free-solid-svg-icons';
@@ -18,6 +18,8 @@ export class WatchNextComponent implements OnInit {
 
   faCheck = faCheck;
 
+  @Output() watchNextChanged: EventEmitter<Object> = new EventEmitter();
+
   constructor(private watchNextService: WatchNextService, private spinner: NgxSpinnerService) { }
 
   ngOnInit() {
@@ -31,12 +33,14 @@ export class WatchNextComponent implements OnInit {
       })    
       .then(watchNext => {
         this.watchNext = watchNext;
+        this.watchNextChanged.emit(watchNext);
       })
       .catch(error => {
         if (error.status === 404) {
           this.watchNextService.selectWatchNext()
             .then(watchNext => {
               this.watchNext = watchNext;
+              this.watchNextChanged.emit(watchNext);
             })
             .catch(() => {
               this.watchNext = null;

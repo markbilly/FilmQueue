@@ -1,3 +1,4 @@
 <app-page-shell>
-    <app-watch-next></app-watch-next>
+    <app-watch-next (watchNextChanged)="watchlist.setWatchNext($event)"></app-watch-next>
+    <app-watchlist #watchlist></app-watchlist>
 </app-page-shell>

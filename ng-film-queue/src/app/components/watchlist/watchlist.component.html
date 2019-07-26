@@ -1,17 +1,30 @@
-<div class="card">
+<div class="card mb-4">
     <div class="card-header">
-        Watchlist
+        Your watchlist
     </div>
     <ul class="list-group list-group-flush">
         <li *ngIf="toWatch.length === 0" class="list-group-item">You have no films in your watchlist.</li>
-        <li *ngFor="let film of toWatch" class="list-group-item">{{film.title}}</li>
+        <li *ngFor="let film of toWatch" class="list-group-item">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <p class="m-0">{{film.title}}<span *ngIf="film.id === watchNextId" class="badge badge-secondary ml-2">Watch next</span></p>
+                    <small class="text-muted">{{film.runtime}}</small>
+                </div>
+                <a class="cursor-pointer link-unstyled text-secondary">
+                    <fa-icon [icon]="faEdit"></fa-icon>
+                    <span class="sr-only">Edit film</span>
+                </a>
+            </div>
+        </li>
     </ul>
 </div>
-<a [routerLink]="" (click)="toggleWatched()" class="d-block text-center my-1">
+<a *ngIf="watched.length > 0" [routerLink]="" (click)="toggleWatched()" class="d-block text-center my-1">
     <small>{{showWatched ? 'Hide' : 'Show'}} watched films</small>
 </a>
 <div class="card" *ngIf="showWatched">
     <ul class="list-group list-group-flush">
-        <li *ngFor="let film of watched" class="list-group-item">{{film.title}}<fa-icon [icon]="faCheck" class="ml-2 float-right"></fa-icon></li>
+        <li *ngFor="let film of watched" class="list-group-item">
+            {{film.title}}<fa-icon [icon]="faCheck" class="ml-2 float-right"></fa-icon>
+        </li>
     </ul>
 </div>
