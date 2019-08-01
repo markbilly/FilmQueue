@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService } from './auth.service';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class WatchNextService {
 
-  apiUrl = 'https://localhost:50506';
+  apiUrl = environment.apiBaseUrl;
   token = null;
 
   constructor(private http: HttpClient, authService: AuthService) { 

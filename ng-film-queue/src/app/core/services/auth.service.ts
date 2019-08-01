@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { UserManager, UserManagerSettings, User } from 'oidc-client';
 import { BehaviorSubject } from 'rxjs';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -55,9 +56,9 @@ export class AuthService {
 
 export function getClientSettings(): UserManagerSettings {
   return {
-      authority: 'https://localhost:50505',
+      authority: environment.identityBaseUrl,
       client_id: 'ng-film-queue',
-      redirect_uri: 'http://localhost:4200/auth-callback',   
+      redirect_uri: environment.baseUrl + '/auth-callback',   
       response_type:"id_token token",
       scope:"openid profile email api.all"
   };
