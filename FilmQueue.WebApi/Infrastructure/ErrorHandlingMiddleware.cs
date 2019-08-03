@@ -42,6 +42,8 @@ namespace FilmQueue.WebApi.Infrastructure
             var error = "An unexpected error occurred.";
 #endif
 
+            _logger.LogError(exception, exception.Message);
+
             var result = JsonConvert.SerializeObject(new { error });
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;

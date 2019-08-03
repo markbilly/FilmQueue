@@ -129,7 +129,7 @@ namespace FilmQueue.WebApi
 
             app.UseCors(options =>
             {
-                options.WithOrigins(Configuration["Url.Spa"])
+                options.AllowAnyOrigin()
                     .AllowAnyMethod()
                     .AllowCredentials()
                     .AllowAnyHeader();

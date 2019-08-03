@@ -55,6 +55,11 @@ namespace FilmQueue.WebApi.DataAccess
                 .OrderByDescending(x => x.ExpiredDateTime.Value)
                 .FirstOrDefaultAsync();
 
+            if (selectionRecord == null)
+            {
+                return null;
+            }
+
             return await _dbContext.FilmRecords.SingleOrDefaultAsync(x => x.Id == selectionRecord.FilmId);
         }
 
