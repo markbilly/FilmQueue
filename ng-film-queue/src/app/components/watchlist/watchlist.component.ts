@@ -14,7 +14,6 @@ export class WatchlistComponent implements OnInit {
   showWatched = false;
 
   faCheck = faCheck;
-  faEdit = faEdit;
 
   toWatch = [];
   watched = [];

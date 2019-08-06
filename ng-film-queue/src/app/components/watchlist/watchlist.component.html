@@ -5,16 +5,8 @@
     <ul class="list-group list-group-flush">
         <li *ngIf="toWatch.length === 0" class="list-group-item">You have no films in your watchlist.</li>
         <li *ngFor="let film of toWatch" class="list-group-item">
-            <div class="d-flex justify-content-between">
-                <div>
-                    <p class="m-0">{{film.title}}<span *ngIf="film.id === watchNextId" class="badge badge-secondary ml-2">Watch next</span></p>
-                    <small class="text-muted">{{film.runtime}}</small>
-                </div>
-                <a class="cursor-pointer link-unstyled text-secondary">
-                    <fa-icon [icon]="faEdit"></fa-icon>
-                    <span class="sr-only">Edit film</span>
-                </a>
-            </div>
+            <p class="m-0">{{film.title}}</p>
+            <small class="text-muted">{{film.runtime}}</small>
         </li>
     </ul>
 </div>

@@ -25,7 +25,7 @@ export class FooterComponent implements OnInit {
     let result: boolean = true;
     url = url.toLowerCase();
 
-    _.forEach(['/watchlist', '/login'], path => {
+    _.forEach(['/add-film', '/login'], path => {
       if (_.includes(url, path)) {
         result = false;
       }
